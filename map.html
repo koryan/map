@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+	
+	<title>Layers Control Tutorial - Leaflet</title>
+
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	
+	<link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js" integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og==" crossorigin=""></script>
+    <script src="https://momentjs.com/downloads/moment.js"></script>
+
+
+	<style>
+		html, body {
+			height: 100%;
+			margin: 0;
+		}
+		#map {
+			width: 900px;
+			height: 800px;
+		}
+		.myTooltip{
+			border-color: red;
+			border-radius: 10px	 
+		}
+
+	</style>
+
+
+
+
+
+</head>
+<body>
+
+<div id='map'></div>
+<script type='text/javascript' src='markers.json'></script>	
+	<script>
+
+var myStyle = {
+	"color": "#ff7800",
+	"weight": 3,
+	"opacity": 0.65
+};
+
+
+
+	var markersLayer = L.layerGroup();
+	var cities = L.layerGroup();
+	var geometry = L.layerGroup();
+	
+	let lineCoords = [];
+console.log("markers.inputValues.length", markers.inputValues.length)
+
+let maxPointLengthInTooltip = 10;
+let prev = undefined;	
+let timeStart = undefined;
+let countRepeats = 1;
+let usedCoords = {};
+let index = 0;
+
+let posMethodsColors = {
+	8192: "a00100",
+	4096: "afafaf",
+	2: "123456"
+
+}
+
+let posList = [];
+
+for ( let i in markers.inputValues)
+{
+	let currentMarker =  markers.inputValues[i];
+	
+	
+	let coords = [currentMarker.inputs[0].v.longitude,currentMarker.inputs[0].v.latitude];
+	let radius = currentMarker.inputs[0].v.radius
+	let currentTime = moment(currentMarker.inputs[1].v).format("hh:mm:ss DD.MM")
+
+	
+	//if (""+coords != ""+prev){
+
+		lineCoords.push(coords);
+		
+		index ++;
+
+		
+
+		
+		
+		
+
+		if(!usedCoords[""+coords]){
+			usedCoords[""+coords] = [[currentTime, i]];
+		}else{
+			usedCoords[""+coords].push([currentTime, i]);
+		}
+
+		let text = 
+			"<b>Радиус:</b> "+radius+"<br>"+
+			"<b>Время:</b> "+ currentTime
+
+		if(usedCoords[""+coords].length > 1){
+			text+="<br><b>Был там:</b> "+usedCoords[""+coords].length + "<br>"+usedCoords[""+coords].map(el => "<i>"+ el[1] +"</i>) "+ el[0]).join("<br />")+""
+			text = usedCoords[""+coords].map(el => el[1]).join(", ")+"</b><br />"+text
+		}else{
+			text = i+"</b><br />"+text
+		}
+		text = "<b>Точка № "+ text;
+
+		let fillColor =  posMethodsColors[currentMarker.inputs[0].v.pos_method]
+		let strokeColor =  "#"+(parseInt(fillColor, 16)+1000).toString(16);
+		fillColor = "#"+fillColor
+		
+		console.log(strokeColor, fillColor)
+		let t = L.circle([currentMarker.inputs[0].v.latitude, currentMarker.inputs[0].v.longitude],{radius: radius, weight: 1, color: strokeColor, fillColor: fillColor}).bindTooltip(text, {className: 'myTooltip'}); 
+		//if (usedCoords[""+coords].length > maxPointLengthInTooltip)
+		t.bindPopup(text)
+		t.addTo(markersLayer)
+		
+		timeStart = currentTime
+		
+	//}	
+	countRepeats = 1;
+	prev = ""+coords;
+	//if(index == 7)break;
+
+
+}
+console.log("posList", posList)
+
+	var myLines = [
+	
+		{"type": "LineString",	"coordinates":lineCoords}
+	];
+
+	L.geoJSON(myLines).addTo(geometry);
+
+
+
+
+	
+	
+
+
+	var mbAttr = 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+			'<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+			'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+		mbUrl = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
+
+	var grayscale   = L.tileLayer(mbUrl, {id: 'mapbox.light', attribution: mbAttr}),
+		streets  = L.tileLayer(mbUrl, {id: 'mapbox.streets',   attribution: mbAttr});
+
+	var map = L.map('map', {
+		center: [markers.inputValues[1].inputs[0].v.latitude, markers.inputValues[1].inputs[0].v.longitude],
+		zoom: 12,
+		layers: [grayscale, cities, geometry, markersLayer]
+	});
+
+	var baseLayers = {
+		"Grayscale": grayscale,
+		"Streets": streets
+	};
+
+	var overlays = {
+		"Cities": cities,
+		"Gmtr": geometry,
+		"markers":markersLayer
+	};
+	
+
+	L.control.layers(baseLayers, overlays).addTo(map);
+</script>
+</body>
+</html>
