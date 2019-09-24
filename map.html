@@ -37,16 +37,15 @@
 <body>
 
 <div id='map'></div>
-<script type='text/javascript' src='markers.json'></script>	
-	<script>
+<script>
 
 
-	var markersLayer = L.layerGroup();
-	var pointsLayer = L.layerGroup();
-	var cities = L.layerGroup();
-	var geometry = L.layerGroup();
-	
-	let lineCoords = [];
+var markersLayer = L.layerGroup();
+var pointsLayer = L.layerGroup();
+var cities = L.layerGroup();
+var geometry = L.layerGroup();
+
+let lineCoords = [];
 
 
 let maxPointLengthInTooltip = 10;
@@ -64,88 +63,94 @@ let posMethodsColors = {
 }
 
 var request = new XMLHttpRequest();
-var body = {"sender":"m2m","profile":"poisk","subscriberId":"msisdn+79152103911","priority":3,"hideTimes":[{"from":"2019-09-24T03:03:34.477Z","to":"2019-09-24T21:00:00.000Z"}],"sources":["locations"],"inputs":[13001,16384],"infolevel":1,"lang":"ru","startTime":"2019-09-23T21:00:00.000Z","endTime":"2019-09-24T21:00:00.000Z"}
-request.open('POST', "http://10.72.12.11:9005");
+var body = {"sender":"m2m","profile":"poisk","subscriberId":"msisdn+79152103911","priority":3,"hideTimes":[{"from":"2019-09-24T03:03:34.477Z","to":"2019-09-24T21:00:00.000Z"}],"sources":["locations"],"inputs":[13001,16384],"infolevel":1,"lang":"ru","startTime":"2019-09-22T21:00:00.000Z","endTime":"2019-09-24T21:00:00.000Z"}
+
+
+request.open('POST', "http://10.72.12.11:9005/ldtdpsvc/rest/v0/ldtd/histvals");
 request.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
 request.setRequestHeader('Authorization', 'Basic bGR0ZHB1c2VyMTp7QTMlcn1zb342dmI=');
 request.setRequestHeader('Accept', 'application/json');
-request.setRequestHeader('Origin', 'http://10.72.12.11');
+
 request.send(JSON.stringify(body));
 
 request.onreadystatechange = function () {
     if (request.readyState === 4) {
        console.log("aaaaaaaa", request.responseText);
+       
+       draw(JSON.parse(request.responseText))
+
     }
 }
 
+let draw = function(markers){
 
-let posList = [];
+	let posList = [];
 
-for ( let i in markers.inputValues)
-{
-	let currentMarker =  markers.inputValues[i];
-	
-	
-	let coords = [currentMarker.inputs[0].v.longitude,currentMarker.inputs[0].v.latitude];
-	let radius = currentMarker.inputs[0].v.radius
-	let currentTime = moment(currentMarker.inputs[1].v).format("HH:mm:ss DD.MM")
-
-	
-	//if (""+coords != ""+prev){
-
-		lineCoords.push(coords);
-		
-		index ++;
-
-		
-
+	for ( let i in markers.inputValues)
+	{
+		let currentMarker =  markers.inputValues[i];
 		
 		
+		let coords = [currentMarker.inputs[0].v.longitude,currentMarker.inputs[0].v.latitude];
+		let radius = currentMarker.inputs[0].v.radius
+		let currentTime = moment(currentMarker.inputs[1].v).format("HH:mm:ss DD.MM")
+
 		
+		//if (""+coords != ""+prev){
 
-		if(!usedCoords[""+coords]){
-			usedCoords[""+coords] = [[currentTime, i]];
-		}else{
-			usedCoords[""+coords].push([currentTime, i]);
-		}
+			lineCoords.push(coords);
+			
+			index ++;
 
-		let text = 
-			"<b>Радиус:</b> "+radius+"<br>"+
-			"<b>Время:</b> "+ currentTime
+			
 
-		if(usedCoords[""+coords].length > 1){
-			text+="<br><b>Был там:</b> "+usedCoords[""+coords].length + "<br>"+usedCoords[""+coords].map(el => "<i>"+ el[1] +"</i>) "+ el[0]).join("<br />")+""
-			text = usedCoords[""+coords].map(el => el[1]).join(", ")+"</b><br />"+text
-		}else{
-			text = i+"</b><br />"+text
-		}
-		text = "<b>Точка № "+ text;
+			
+			
+			
 
-		let fillColor =  posMethodsColors[currentMarker.inputs[0].v.pos_method]
-		let strokeColor =  "#"+(parseInt(fillColor, 16)+1000).toString(16);
-		fillColor = "#"+fillColor
-		
-		console.log(strokeColor, fillColor)
+			if(!usedCoords[""+coords]){
+				usedCoords[""+coords] = [[currentTime, i]];
+			}else{
+				usedCoords[""+coords].push([currentTime, i]);
+			}
 
-		let t = L.circle([currentMarker.inputs[0].v.latitude, currentMarker.inputs[0].v.longitude],{radius: radius, weight: .5, color: strokeColor, fillColor: fillColor, fillOpacity: .05});
-		let cCenter = L.circleMarker([currentMarker.inputs[0].v.latitude, currentMarker.inputs[0].v.longitude],{radius: 5, weight: 1, color: "white", fillColor: "green"}).bindTooltip(text, {className: 'myTooltip'});
+			let text = 
+				"<b>Радиус:</b> "+radius+"<br>"+
+				"<b>Время:</b> "+ currentTime
 
+			if(usedCoords[""+coords].length > 1){
+				text+="<br><b>Был там:</b> "+usedCoords[""+coords].length + "<br>"+usedCoords[""+coords].map(el => "<i>"+ el[1] +"</i>) "+ el[0]).join("<br />")+""
+				text = usedCoords[""+coords].map(el => el[1]).join(", ")+"</b><br />"+text
+			}else{
+				text = i+"</b><br />"+text
+			}
+			text = "<b>Точка № "+ text;
 
-		//if (usedCoords[""+coords].length > maxPointLengthInTooltip)
-		t.bindPopup(text)
-		t.addTo(markersLayer)
-		cCenter.addTo(pointsLayer)
-		
-		timeStart = currentTime
-		
-	//}	
-	countRepeats = 1;
-	prev = ""+coords;
-	//if(index == 7)break;
+			let fillColor =  posMethodsColors[currentMarker.inputs[0].v.pos_method]
+			let strokeColor =  "#"+(parseInt(fillColor, 16)+1000).toString(16);
+			fillColor = "#"+fillColor
+			
+			console.log(strokeColor, fillColor)
+
+			let t = L.circle([currentMarker.inputs[0].v.latitude, currentMarker.inputs[0].v.longitude],{radius: radius, weight: .5, color: strokeColor, fillColor: fillColor, fillOpacity: .05});
+			let cCenter = L.circleMarker([currentMarker.inputs[0].v.latitude, currentMarker.inputs[0].v.longitude],{radius: 5, weight: 1, color: "white", fillColor: "green"}).bindTooltip(text, {className: 'myTooltip'});
 
 
-}
-console.log("posList", posList)
+			//if (usedCoords[""+coords].length > maxPointLengthInTooltip)
+			t.bindPopup(text)
+			t.addTo(markersLayer)
+			cCenter.addTo(pointsLayer)
+			
+			timeStart = currentTime
+			
+		//}	
+		countRepeats = 1;
+		prev = ""+coords;
+		//if(index == 7)break;
+
+
+	}
+
 
 	var myLines = [
 	
@@ -169,8 +174,10 @@ console.log("posList", posList)
 	var grayscale   = L.tileLayer(mbUrl, {id: 'mapbox.light', attribution: mbAttr}),
 		streets  = L.tileLayer(mbUrl, {id: 'mapbox.streets',   attribution: mbAttr});
 
+console.log(markers.inputValues[0])
+
 	var map = L.map('map', {
-		center: [markers.inputValues[1].inputs[0].v.latitude, markers.inputValues[1].inputs[0].v.longitude],
+		center: [markers.inputValues[0].inputs[0].v.latitude, markers.inputValues[0].inputs[0].v.longitude],
 		zoom: 12,
 		layers: [grayscale, cities, geometry, markersLayer,pointsLayer]
 	});
@@ -188,6 +195,7 @@ console.log("posList", posList)
 	
 
 	L.control.layers(baseLayers, overlays).addTo(map);
+}
 </script>
 </body>
 </html>
