@@ -2,12 +2,11 @@
 <html>
 <head>
 	
-	<title>1Layers Control Tutorial - Leaflet</title>
+	<title>Мапа</title>
 
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	
-	<link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
+
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js" integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og==" crossorigin=""></script>
@@ -41,13 +40,6 @@
 <script type='text/javascript' src='markers.json'></script>	
 	<script>
 
-var myStyle = {
-	"color": "#ff7800",
-	"weight": 3,
-	"opacity": 0.65
-};
-
-
 
 	var markersLayer = L.layerGroup();
 	var pointsLayer = L.layerGroup();
@@ -55,7 +47,7 @@ var myStyle = {
 	var geometry = L.layerGroup();
 	
 	let lineCoords = [];
-console.log("markers.inputValues.length", markers.inputValues.length)
+
 
 let maxPointLengthInTooltip = 10;
 let prev = undefined;	
@@ -71,6 +63,22 @@ let posMethodsColors = {
 
 }
 
+var request = new XMLHttpRequest();
+var body = {"sender":"m2m","profile":"poisk","subscriberId":"msisdn+79152103911","priority":3,"hideTimes":[{"from":"2019-09-24T03:03:34.477Z","to":"2019-09-24T21:00:00.000Z"}],"sources":["locations"],"inputs":[13001,16384],"infolevel":1,"lang":"ru","startTime":"2019-09-23T21:00:00.000Z","endTime":"2019-09-24T21:00:00.000Z"}
+request.open('POST', "http://10.72.12.11:9005");
+request.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+request.setRequestHeader('Authorization', 'Basic bGR0ZHB1c2VyMTp7QTMlcn1zb342dmI=');
+request.setRequestHeader('Accept', 'application/json');
+request.setRequestHeader('Origin', 'http://10.72.12.11');
+request.send(JSON.stringify(body));
+
+request.onreadystatechange = function () {
+    if (request.readyState === 4) {
+       console.log("aaaaaaaa", request.responseText);
+    }
+}
+
+
 let posList = [];
 
 for ( let i in markers.inputValues)
@@ -80,7 +88,7 @@ for ( let i in markers.inputValues)
 	
 	let coords = [currentMarker.inputs[0].v.longitude,currentMarker.inputs[0].v.latitude];
 	let radius = currentMarker.inputs[0].v.radius
-	let currentTime = moment(currentMarker.inputs[1].v).format("hh:mm:ss DD.MM")
+	let currentTime = moment(currentMarker.inputs[1].v).format("HH:mm:ss DD.MM")
 
 	
 	//if (""+coords != ""+prev){
@@ -118,8 +126,10 @@ for ( let i in markers.inputValues)
 		fillColor = "#"+fillColor
 		
 		console.log(strokeColor, fillColor)
-		let t = L.circle([currentMarker.inputs[0].v.latitude, currentMarker.inputs[0].v.longitude],{radius: radius, weight: 1, color: strokeColor, fillColor: fillColor});
-		let cCenter = L.circle([currentMarker.inputs[0].v.latitude, currentMarker.inputs[0].v.longitude],{radius: 3, weight: 1, color: "white", fillColor: fillColor}).bindTooltip(text, {className: 'myTooltip'});
+
+		let t = L.circle([currentMarker.inputs[0].v.latitude, currentMarker.inputs[0].v.longitude],{radius: radius, weight: .5, color: strokeColor, fillColor: fillColor, fillOpacity: .05});
+		let cCenter = L.circleMarker([currentMarker.inputs[0].v.latitude, currentMarker.inputs[0].v.longitude],{radius: 5, weight: 1, color: "white", fillColor: "green"}).bindTooltip(text, {className: 'myTooltip'});
+
 
 		//if (usedCoords[""+coords].length > maxPointLengthInTooltip)
 		t.bindPopup(text)
@@ -171,7 +181,6 @@ console.log("posList", posList)
 	};
 
 	var overlays = {
-		//"Cities": cities,
 		"Сырой трек": geometry,
 		"Сырые радиусы":markersLayer,
 		"Сырые точки":pointsLayer
