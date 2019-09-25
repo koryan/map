@@ -1,5 +1,5 @@
 
-
+let defaultMsisdn = "+79152103911"
 
 var layers = {
 	markersLayer: L.layerGroup(),
@@ -14,8 +14,6 @@ var layers = {
 }
 
 var bigMap = undefined;
-
-
 let maxPointLengthInTooltip = 10;
 let prev = undefined;	
 
@@ -27,37 +25,56 @@ let posMethodsColors = {
 
 }
 
-//fill inputs 
-// let startParams = {
-// 	msisdn: '+79152103911',
-// 	fromTime: 
-// 	tillTime: 
-// }
 
+//init date & time
+$( function() {
+    var dateFormat = "dd.mm.yy",
+      fromDate = $( "#fromDate" )
+        .datepicker({dateFormat: dateFormat, maxDate: new Date()}).on( "change", function() {
+        	tillDate.datepicker( "option", "minDate", getDate( this ) );
+        }),
+      tillDate = $( "#tillDate" ).datepicker({dateFormat: dateFormat}).on( "change", function() {
+        	fromDate.datepicker( "option", "maxDate", getDate( this ) );
+      	});
+
+    fromDate.datepicker('setDate', new Date());
+    tillDate.datepicker('setDate', new Date())
+ 	$("#fromTime").val("00:00")
+	$("#tillTime").val("23:55")
+
+    function getDate( element ) {
+      var date;
+      try {
+        date = $.datepicker.parseDate( dateFormat, element.value );
+      } catch( error ) {
+        date = null;
+      }
+ 
+      return date;
+    }
+    $("#msisdn").val(defaultMsisdn);
+} );
 
 document.addEventListener("DOMContentLoaded", function() {
 	mapInit()
-
 	
-	makeRequest()
+	
+	getData()
 });
-
-console.log(document.getElementById('msisdn'))
-
 
 
 
 
 document.addEventListener('click', function (event) {	
 	if (event.target.matches('#submit')){
-		makeRequest()
+		getData()
 	}
 	if(event.target.matches('#clear')){
 		layers.clear()
 	}
 }, false);
 
-function makeRequest(){
+function getData(){
 	let doRequest = function(cb){
 		var request = new XMLHttpRequest();
 		var body = {"sender":"m2m","profile":"poisk","subscriberId":"msisdn"+msisdn,"priority":3,"hideTimes":[{"from":"2018-09-24T03:03:34.477Z","to":"2018-09-24T21:00:00.000Z"}],"sources":["locations"],"inputs":[13001,16384],"infolevel":1,"lang":"ru","startTime":fromTime,"endTime":tillTime}
@@ -88,8 +105,10 @@ function makeRequest(){
 	layers.clear()
 
 	let msisdn = document.getElementById('msisdn').value
-	let fromTime = document.getElementById('fromTime').value
-	let tillTime = document.getElementById('tillTime').value
+
+
+	let fromTime = moment(document.getElementById('fromDate').value + ' ' + document.getElementById('fromTime').value+':59', 'DD.MM.YYYY HH:mm:ss').toISOString()
+	let tillTime = moment(document.getElementById('tillDate').value + ' ' + document.getElementById('tillTime').value+':59', 'DD.MM.YYYY HH:mm:ss').toISOString()
 
 	doRequest(function(err, data){
 		if(err){

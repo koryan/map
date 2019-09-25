@@ -8,8 +8,13 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js" integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og==" crossorigin=""></script>
     <script src="https://momentjs.com/downloads/moment.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script src="scripts.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <link rel="stylesheet" href="style.css" />
+
+    
 </head>
 <body>
 
@@ -18,15 +23,21 @@
 	<table>
 		<tr>
 			<td>Абонент</td>
-			<td><input type='phone' id='msisdn' value='+79152103911' >
+			<td><input type='phone' id='msisdn' >
 		</tr>
-		<tr>
-			<td>Время с</td>
-			<td><input id='fromTime' value='2019-09-22T21:00:00.000Z' >
+		<tr class="datetime">
+			<td>Дата и время с</td>
+			<td>
+				<input id='fromDate' name="Date" type="text" >
+				<input id='fromTime' name="fromTime">
+			</td>
 		</tr>
-		<tr>
-			<td>Время по</td>
-			<td><input id='tillTime' value='2019-09-24T21:00:00.000Z' >
+		<tr class="datetime">
+			<td>Дата и время по</td>
+			<td>
+				<input id='tillDate' name="tillDate" type="text" >
+				<input id='tillTime' name="tillTime" type="text" >
+			</td>
 		</tr>
 		<tr>
 			<td rowspan=2>
