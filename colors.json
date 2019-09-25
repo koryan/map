@@ -1,0 +1,22 @@
+var pointsColors = {
+		"raw": {
+			"circleBorder": "darkred",
+			"circle": "lightgreen",
+			"pointBorder": "yellow",
+			"point": "lime",
+			"track": "blue",
+		},
+		"processed": {
+			"circleBorder": "yellow",
+			"circle": "orange",
+			"pointBorder": "green",
+			"point": "blue",
+			"track": "red",
+		},
+		"live":{
+			"circleBorder": "red",
+			"circle": "blue",
+			"pointBorder": "green",
+			"point": "white",
+		}
+	}

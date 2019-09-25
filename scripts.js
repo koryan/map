@@ -168,28 +168,7 @@ let draw = function(markers, type){
 	let index = 0;
 	let lineCoords = [];
 
-	let colors = {
-		"raw": {
-			circleBorder: "darkred",
-			circle: "lightgreen",
-			pointBorder: "yellow",
-			point: "lime",
-			track: "blue",
-		},
-		"processed": {
-			circleBorder: "yellow",
-			circle: "orange",
-			pointBorder: "green",
-			point: "blue",
-			track: "red",
-		},
-		"live":{
-			circleBorder: "red",
-			circle: "blue",
-			pointBorder: "green",
-			point: "white",
-		}
-	}
+	let colors = pointsColors;
 	for ( let i in markers.inputValues)
 	{
 		let currentMarker =  markers.inputValues[i];
