@@ -1,0 +1,16 @@
+html, body {
+	height: 100%;
+	margin: 0;
+}
+#map {
+	width: calc(100% - 300px);
+	height: 100%;
+	float:left;
+}
+.myTooltip{
+	border-color: red;
+	border-radius: 10px	 
+}
+#controls{width: 300px;margin-left: calc(100% - 300px);padding:0px 10px;}
+#controls>table{width:100%;}
+#controls>h4{padding:0px;margin:0px 0px 10px;}
