@@ -17,3 +17,6 @@ html, body {
 #ui-datepicker-div{z-index:1000;}
 table tr.datetime input{width:45%;}
 table tr.datetime>td:first-of-type{font-size:70%;}
+dataTypeSelector{display:block;font-size:70%;width:100%;}
+dataTypeSelector label{cursor:pointer;display:inline;margin-right:10px;}
+dataTypeSelector label>*{vertical-align: middle;display:inline-block;}

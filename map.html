@@ -40,7 +40,21 @@
 			</td>
 		</tr>
 		<tr>
-			<td rowspan=2>
+			<td colspan=2>
+				<dataTypeSelector>
+					<label>
+						<input type='checkbox' id='rawDataCheck' name='dataTypeRaw' checked='checked'>
+						<span>Raw data</span>
+					</label>
+					<label>
+						<input type='checkbox' id='processedDataCheck' name='dataTypeProcess' checked='checked'>
+						<span>Processed</span>
+					</label>
+					<label onclick="alert('Not implemented yet'); ">
+						<input type='checkbox' id='liveDataCheck' name='dataTypeLive' disabled='disabled'>
+						<span>Live data</span>
+					</label>
+				</dataTypeSelector>
 				
 				<input type='submit' id='submit' value='Запрос'>
 				<input type='submit' id='clear' value='Очистить'>

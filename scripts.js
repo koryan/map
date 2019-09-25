@@ -29,11 +29,10 @@ let posMethodsColors = {
 //init date & time
 $( function() {
     var dateFormat = "dd.mm.yy",
-      fromDate = $( "#fromDate" )
-        .datepicker({dateFormat: dateFormat, maxDate: new Date()}).on( "change", function() {
+      fromDate = $( "#fromDate" ).datepicker({dateFormat: dateFormat, maxDate: new Date()}).on( "change", function() {
         	tillDate.datepicker( "option", "minDate", getDate( this ) );
         }),
-      tillDate = $( "#tillDate" ).datepicker({dateFormat: dateFormat}).on( "change", function() {
+      tillDate = $( "#tillDate" ).datepicker({dateFormat: dateFormat, maxDate: new Date()}).on( "change", function() {
         	fromDate.datepicker( "option", "maxDate", getDate( this ) );
       	});
 
@@ -75,12 +74,34 @@ document.addEventListener('click', function (event) {
 }, false);
 
 function getData(){
-	let doRequest = function(cb){
-		var request = new XMLHttpRequest();
-		var body = {"sender":"m2m","profile":"poisk","subscriberId":"msisdn"+msisdn,"priority":3,"hideTimes":[{"from":"2018-09-24T03:03:34.477Z","to":"2018-09-24T21:00:00.000Z"}],"sources":["locations"],"inputs":[13001,16384],"infolevel":1,"lang":"ru","startTime":fromTime,"endTime":tillTime}
+	let doRequest = function(type, cb){
+		let uri = "http://10.72.12.11:9005";
+		let request = new XMLHttpRequest();
+		let body = {}
+		if(!!~["raw", "processed"].indexOf(type)){
+			let dataArrObj = {
+				"raw": [12561,16384],
+				"processed": [13001,16384]
+			} 
+			
+			
+			let getDataArr = dataArrObj[type];
+			body = {"sender":"m2m","profile":"poisk","subscriberId":"msisdn"+msisdn,"priority":3,"hideTimes":[{"from":"2018-09-24T03:03:34.477Z","to":"2018-09-24T21:00:00.000Z"}],"sources":["locations"],"inputs":getDataArr,"infolevel":1,"lang":"ru","startTime":fromTime,"endTime":tillTime}
+			request.open('POST', uri+ "/ldtdpsvc/rest/v0/ldtd/histvals");
 
+		}else if(!!~["live"].indexOf(type)){
+			let literal = {
+				"last": "getLast",
+				"live": "getOnce"
+			} 
+			
 
-		request.open('POST', "http://10.72.12.11:9005/ldtdpsvc/rest/v0/ldtd/histvals");
+			body = {"sender":"m2m","profile":"poisk","subscriberId":"msisdn+79152103911","priority":3,"hideTimes":[],"sources":["locations"],"inputs":[12561,16384],"infolevel":1,"lang":"ru","age":60}
+
+			request.open('POST', uri+ "/ldtdpsvc/rest/v0/ldtd/opervals?action="+ literal[type]);
+		}
+
+		
 		request.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
 		request.setRequestHeader('Authorization', 'Basic bGR0ZHB1c2VyMTp7QTMlcn1zb342dmI=');
 		request.setRequestHeader('Accept', 'application/json');
@@ -92,6 +113,8 @@ function getData(){
 
 		    if (request.readyState === 4) {
 		       let ans = JSON.parse(request.responseText)
+		      
+		       if(!ans.inputValues && ans.inputs && ans.inputs.length){ans.inputValues = ans.inputs}
 		       if(!ans.inputValues){
 		       		cb("No data")
 		       		return
@@ -110,20 +133,63 @@ function getData(){
 	let fromTime = moment(document.getElementById('fromDate').value + ' ' + document.getElementById('fromTime').value+':59', 'DD.MM.YYYY HH:mm:ss').toISOString()
 	let tillTime = moment(document.getElementById('tillDate').value + ' ' + document.getElementById('tillTime').value+':59', 'DD.MM.YYYY HH:mm:ss').toISOString()
 
-	doRequest(function(err, data){
-		if(err){
-			alert(err)
-			return;
-		}
-		draw(data)
-	})
+	if($("#processedDataCheck:checked").length){
+		doRequest('processed', function(err, data){
+			if(err){
+				alert(err)
+				return;
+			}
+			draw(data, 'processed')
+		})
+	}
+	if($("#rawDataCheck:checked").length){
+		doRequest('raw', function(err, data){
+			if(err){
+				alert(err)
+				return;
+			}
+			draw(data, 'raw')
+		})
+	}
+	if($("#liveDataCheck:checked").length){
+		doRequest('live', function(err, data){
+			if(err){
+				alert(err)
+				return;
+			}
+			draw(data, 'live')
+		})
+	}
 }
 
-let draw = function(markers){
+let draw = function(markers, type){
 	let countRepeats = 1;
 	let usedCoords = {};
 	let index = 0;
 	let lineCoords = [];
+
+	let colors = {
+		"raw": {
+			circleBorder: "darkred",
+			circle: "lightgreen",
+			pointBorder: "yellow",
+			point: "lime",
+			track: "blue",
+		},
+		"processed": {
+			circleBorder: "yellow",
+			circle: "orange",
+			pointBorder: "green",
+			point: "blue",
+			track: "red",
+		},
+		"live":{
+			circleBorder: "red",
+			circle: "blue",
+			pointBorder: "green",
+			point: "white",
+		}
+	}
 	for ( let i in markers.inputValues)
 	{
 		let currentMarker =  markers.inputValues[i];
@@ -157,13 +223,8 @@ let draw = function(markers){
 			}
 			text = "<b>Точка № "+ text;
 
-			let fillColor =  posMethodsColors[currentMarker.inputs[0].v.pos_method]
-			let strokeColor =  "#"+(parseInt(fillColor, 16)+1000).toString(16);
-			fillColor = "#"+fillColor
-			
-
-			let circle = L.circle([currentMarker.inputs[0].v.latitude, currentMarker.inputs[0].v.longitude],{radius: radius, weight: .5, color: strokeColor, fillColor: fillColor, fillOpacity: .05});
-			let cCenter = L.circleMarker([currentMarker.inputs[0].v.latitude, currentMarker.inputs[0].v.longitude],{radius: 5, weight: 1, color: "white", fillColor: "green"});
+			let circle = L.circle([currentMarker.inputs[0].v.latitude, currentMarker.inputs[0].v.longitude],{radius: radius, weight: .5, color: colors[type].circleBorder, fillColor: colors[type].circle, fillOpacity: .05});
+			let cCenter = L.circleMarker([currentMarker.inputs[0].v.latitude, currentMarker.inputs[0].v.longitude],{radius: 5, weight: 1, color: colors[type].pointBorder, fillColor: colors[type].point});
 
 
 			//if (usedCoords[""+coords].length > maxPointLengthInTooltip)
@@ -181,8 +242,8 @@ let draw = function(markers){
 
 
 	}
-
-	var polyline = L.polyline(lineCoords, {color: 'red', weight:1}).addTo(layers.geometry);
+	if(type == "live")return;
+	var polyline = L.polyline(lineCoords, {color: colors[type].track, weight:1}).addTo(layers.geometry);
 	bigMap.fitBounds(polyline.getBounds());
 	
 	//L.geoJSON({"type": "LineString",	"coordinates":lineCoords}).addTo(layers.geometry);
@@ -210,9 +271,9 @@ var mapInit = function(){
 	};
 
 	var overlays = {
-		"Сырой трек": layers.geometry,
-		"Сырые радиусы":layers.markersLayer,
-		"Сырые точки":layers.pointsLayer
+		"Трек": layers.geometry,
+		"Радиусы":layers.markersLayer,
+		"Точки":layers.pointsLayer
 	};
 	
 
