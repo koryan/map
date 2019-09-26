@@ -222,8 +222,8 @@ console.log(type, markers)
 			}
 			text = "<b>Точка № "+ text;
 
-			let circle = L.circle([currentMarker.inputs[0].v.latitude, currentMarker.inputs[0].v.longitude],{radius: radius, weight: .5, color: colors[type].circleBorder, fillColor: colors[type].circle, fillOpacity: .05});
-			let cCenter = L.circleMarker([currentMarker.inputs[0].v.latitude, currentMarker.inputs[0].v.longitude],{radius: 5, weight: 1, color: colors[type].pointBorder, fillColor: colors[type].point});
+			let circle  = L.circle(      [currentMarker.inputs[0].v.latitude, currentMarker.inputs[0].v.longitude],{radius: radius, weight: colors[type].circleBorderWeight, color: colors[type].circleBorder, fillColor: colors[type].circle, fillOpacity: .05});
+			let cCenter = L.circleMarker([currentMarker.inputs[0].v.latitude, currentMarker.inputs[0].v.longitude],{radius: 5,      weight: colors[type].circleBorderWeight, color: colors[type].pointBorder, fillColor: colors[type].point});
 
 
 			//if (usedCoords[""+coords].length > maxPointLengthInTooltip)

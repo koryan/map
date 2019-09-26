@@ -1,6 +1,7 @@
 var pointsColors = {
 		"raw": {
 			"circleBorder": "darkred",
+			"circleBorderWeight": 0.5,
 			"circle": "lightgreen",
 			"pointBorder": "yellow",
 			"point": "lime",
@@ -8,6 +9,7 @@ var pointsColors = {
 		},
 		"processed": {
 			"circleBorder": "yellow",
+			"circleBorderWeight": 1,
 			"circle": "orange",
 			"pointBorder": "green",
 			"point": "blue",
@@ -15,6 +17,7 @@ var pointsColors = {
 		},
 		"last": {
 			"circleBorder": "green",
+			"circleBorderWeight": 1,
 			"circle": "red",
 			"pointBorder": "green",
 			"point": "blue",
@@ -22,8 +25,10 @@ var pointsColors = {
 		},
 		"live":{
 			"circleBorder": "red",
+			"circleBorderWeight": 1,
 			"circle": "blue",
 			"pointBorder": "green",
 			"point": "white",
+			"track": "green",
 		}
 	}
