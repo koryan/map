@@ -114,7 +114,7 @@ function getData(){
 		    if (request.readyState === 4) {
 		       let ans = JSON.parse(request.responseText)
 		      
-		       if(!ans.inputValues && ans.inputs && ans.inputs.length){ans.inputValues = ans.inputs}
+		       if(!ans.inputValues && ans.inputs && ans.inputs.length){ans.inputValues = [{inputs:ans.inputs}]}
 		       if(!ans.inputValues){
 		       		cb("No data")
 		       		return
@@ -133,33 +133,28 @@ function getData(){
 	let fromTime = moment(document.getElementById('fromDate').value + ' ' + document.getElementById('fromTime').value+':59', 'DD.MM.YYYY HH:mm:ss').toISOString()
 	let tillTime = moment(document.getElementById('tillDate').value + ' ' + document.getElementById('tillTime').value+':59', 'DD.MM.YYYY HH:mm:ss').toISOString()
 
-	if($("#processedDataCheck:checked").length){
-		doRequest('processed', function(err, data){
-			if(err){
-				alert(err)
-				return;
+
+	let requestAndDraw = function(types){
+		for(var i in types){
+			let curType = types[i];
+			if($("#"+ curType +"DataCheck:checked").length){
+
+				$("#"+ curType +"Loader").css("display", "inline-block");
+				$("#"+ curType +"DataCheck").hide()
+				doRequest(curType, function(err, data){
+					$("#"+ curType +"Loader").hide();
+					$("#"+ curType +"DataCheck").css("display", "inline-block");
+					if(err){
+						alert(err)
+						return;
+					}
+					draw(data, curType)
+				})
 			}
-			draw(data, 'processed')
-		})
+		}		
 	}
-	if($("#rawDataCheck:checked").length){
-		doRequest('raw', function(err, data){
-			if(err){
-				alert(err)
-				return;
-			}
-			draw(data, 'raw')
-		})
-	}
-	if($("#liveDataCheck:checked").length){
-		doRequest('live', function(err, data){
-			if(err){
-				alert(err)
-				return;
-			}
-			draw(data, 'live')
-		})
-	}
+
+	requestAndDraw(['raw', 'processed', 'live'])
 }
 
 let draw = function(markers, type){
@@ -167,12 +162,12 @@ let draw = function(markers, type){
 	let usedCoords = {};
 	let index = 0;
 	let lineCoords = [];
-
+console.log(markers, type)
 	let colors = pointsColors;
 	for ( let i in markers.inputValues)
 	{
 		let currentMarker =  markers.inputValues[i];
-		
+		console.log("currentMarker", currentMarker)
 		
 		let coords = [currentMarker.inputs[0].v.latitude, currentMarker.inputs[0].v.longitude,];
 		let radius = currentMarker.inputs[0].v.radius

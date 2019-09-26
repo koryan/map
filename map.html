@@ -44,15 +44,18 @@
 			<td colspan="2">
 				<dataTypeSelector>
 					<label>
+						<smallLoader id="rawLoader"></smallLoader>
 						<input type='checkbox' id='rawDataCheck' name='dataTypeRaw' checked='checked'>
 						<span>Raw data</span>
 					</label>
 					<label>
+						<smallLoader id="processedLoader"></smallLoader>
 						<input type='checkbox' id='processedDataCheck' name='dataTypeProcess' checked='checked'>
 						<span>Processed</span>
 					</label>
-					<label onclick="alert('Not implemented yet'); ">
-						<input type='checkbox' id='liveDataCheck' name='dataTypeLive' disabled='disabled'>
+					<label>
+						<smallLoader id="liveLoader"></smallLoader>
+						<input type='checkbox' id='liveDataCheck' name='dataTypeLive' >
 						<span>Live data</span>
 					</label>
 				</dataTypeSelector>	
