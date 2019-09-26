@@ -52,6 +52,21 @@ $( function() {
       return date;
     }
     $("#msisdn").val(defaultMsisdn);
+
+    let tpParams = {
+	    timeFormat: 'HH:mm',
+	    interval: 30,
+	    //minTime: '10',
+	    maxTime: '23:59',
+	    defaultTime: '00:00',
+	    startTime: '00:00',
+	    dynamic: false,
+	    dropdown: true,
+	    scrollbar: true
+	}
+    $('#fromTime').timepicker(tpParams);
+    tpParams.defaultTime = '23:59'
+	$('#tillTime').timepicker(tpParams);
 } );
 
 document.addEventListener("DOMContentLoaded", function() {
