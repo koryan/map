@@ -19,9 +19,9 @@
 </head>
 <body>
 
-<div id='map'></div><div id='controls'>
-	<h4>Params</h4>
+<div id='map'></div><div id='controls'><wrapper>
 	<table>
+		<caption>Параметры</caption>
 		<tr>
 			<td>Абонент</td>
 			<td><input type='phone' id='msisdn' >
@@ -29,19 +29,19 @@
 		<tr class="datetime">
 			<td>Дата и время с</td>
 			<td>
-				<input id='fromDate' name="Date" type="text" >
-				<input id='fromTime' name="fromTime">
+				<input id='fromDate' name="Date" type="text" />
+				<input id='fromTime' name="fromTime" type="text" />
 			</td>
 		</tr>
 		<tr class="datetime">
 			<td>Дата и время по</td>
 			<td>
-				<input id='tillDate' name="tillDate" type="text" >
-				<input id='tillTime' name="tillTime" type="text" >
+				<input id='tillDate' name="tillDate" type="text" />
+				<input id='tillTime' name="tillTime" type="text" />
 			</td>
 		</tr>
 		<tr>
-			<td colspan=2>
+			<td colspan="2">
 				<dataTypeSelector>
 					<label>
 						<input type='checkbox' id='rawDataCheck' name='dataTypeRaw' checked='checked'>
@@ -62,6 +62,6 @@
 			</td>
 		</tr>
 	</table>
-</div>
+</wrapper></div>
 </body>
 </html>

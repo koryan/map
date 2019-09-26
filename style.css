@@ -1,9 +1,11 @@
 html, body {
 	height: 100%;
 	margin: 0;
+	font-family: Arial;
+	font-size: 12px
 }
 #map {
-	width: calc(100% - 310px);
+	width: calc(100% - 300px);
 	height: 100%;
 	float:left;
 }
@@ -12,11 +14,16 @@ html, body {
 	border-radius: 10px	 
 }
 #controls{width: 300px;margin-left: calc(100% - 300px);}
-#controls>table{width:100%;}
-#controls>h4{padding:0px;margin:0px 0px 10px;}
+#controls>wrapper{display:block;padding:10px;}
+#controls table{width:100%;}
+#controls table>caption{text-align: left;font-weight:bold;margin-bottom:5px;font-size:110%;}
 #ui-datepicker-div{z-index:1000;}
-table tr.datetime input{width:45%;}
-table tr.datetime>td:first-of-type{font-size:70%;}
-dataTypeSelector{display:block;font-size:70%;width:100%;}
+table input{padding:0px 3px;font-size:90%;text-align:right;}
+table tr.datetime input{width:44%;}
+table tr>td{padding:0px;}
+table tr>td:first-of-type{font-size:100%;}
+table tr:first-of-type input{width:94%;}
+dataTypeSelector{display:block;font-size:100%;width:100%;margin-top:10px;margin-bottom:10px;}
 dataTypeSelector label{cursor:pointer;display:inline;margin-right:10px;}
-dataTypeSelector label>*{vertical-align: middle;display:inline-block;}
+dataTypeSelector label>*{vertical-align: bottom;display:inline-block;}
+dataTypeSelector label>input{margin:0px;}
