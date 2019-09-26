@@ -38,8 +38,6 @@ $( function() {
 
     fromDate.datepicker('setDate', new Date());
     tillDate.datepicker('setDate', new Date())
- 	$("#fromTime").val("00:00")
-	$("#tillTime").val("23:55")
 
     function getDate( element ) {
       var date;
@@ -56,7 +54,6 @@ $( function() {
     let tpParams = {
 	    timeFormat: 'HH:mm',
 	    interval: 30,
-	    //minTime: '10',
 	    maxTime: '23:59',
 	    defaultTime: '00:00',
 	    startTime: '00:00',
@@ -71,8 +68,6 @@ $( function() {
 
 document.addEventListener("DOMContentLoaded", function() {
 	mapInit()
-	
-	
 	getData()
 });
 
@@ -156,7 +151,11 @@ function getData(){
 					$("#"+ curType +"Loader").hide();
 					$("#"+ curType +"DataCheck").css("display", "inline-block");
 					if(err){
-						alert(err)
+						if(err == "No data"){
+							$("#"+ curType +"NoData").css("display", "inline-block");
+						}else{
+							alert(err)	
+						}
 						return;
 					}
 					draw(data, curType)
@@ -174,7 +173,6 @@ function getData(){
 
 	layers.clear()
 	$("noData[id$=NoData]:visible").hide();
-
 	requestAndDraw(['raw', 'processed', 'live', 'last'])
 }
 
@@ -209,10 +207,8 @@ let draw = function(markers, type){
 		let coords = [currentMarker.inputs[0].v.latitude, currentMarker.inputs[0].v.longitude,];
 		let radius = currentMarker.inputs[0].v.radius
 		let currentTime = moment(currentMarker.inputs[1].v).format("HH:mm:ss DD.MM")
-
 		
 		//if (""+coords != ""+prev){
-
 			lineCoords.push(coords);
 			index ++;
 
@@ -249,9 +245,6 @@ let draw = function(markers, type){
 		//}	
 		countRepeats = 1;
 		prev = ""+coords;
-		//if(index == 7)break;
-
-
 	}
 	var polyline = L.polyline(lineCoords, {color: colors[type].track, weight:1}).addTo(layers.geometry);
 
@@ -262,15 +255,6 @@ let draw = function(markers, type){
 	}else{
 		bigMap.fitBounds(circle.getBounds());
 	}
-
-
-	
-	
-	
-	//L.geoJSON({"type": "LineString",	"coordinates":lineCoords}).addTo(layers.geometry);
-
-	
-	
 }
 
 var mapInit = function(){
@@ -296,10 +280,7 @@ var mapInit = function(){
 		"Радиусы":layers.markersLayer,
 		"Точки":layers.pointsLayer
 	};
-	
 
 	L.control.layers(baseLayers, overlays).addTo(bigMap);
-
-	
 }
 
