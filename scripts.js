@@ -202,13 +202,10 @@ let draw = function(markers, type){
 		markers.inputValues = [{inputs: markers.inputValues}]
 	}
 
-console.log(type, markers)
-
 	for ( let i in markers.inputValues)
 	{
 		let currentMarker =  markers.inputValues[i];
-		console.log("currentMarker", currentMarker)
-		
+
 		let coords = [currentMarker.inputs[0].v.latitude, currentMarker.inputs[0].v.longitude,];
 		let radius = currentMarker.inputs[0].v.radius
 		let currentTime = moment(currentMarker.inputs[1].v).format("HH:mm:ss DD.MM")
@@ -237,7 +234,7 @@ console.log(type, markers)
 			}
 			text = "<b>Точка № "+ text;
 
-			let circle  = L.circle(      [currentMarker.inputs[0].v.latitude, currentMarker.inputs[0].v.longitude],{radius: radius, weight: colors[type].circleBorderWeight, color: colors[type].circleBorder, fillColor: colors[type].circle, fillOpacity: .05});
+			var circle  = L.circle(      [currentMarker.inputs[0].v.latitude, currentMarker.inputs[0].v.longitude],{radius: radius, weight: colors[type].circleBorderWeight, color: colors[type].circleBorder, fillColor: colors[type].circle, fillOpacity: .05});
 			let cCenter = L.circleMarker([currentMarker.inputs[0].v.latitude, currentMarker.inputs[0].v.longitude],{radius: 5,      weight: colors[type].circleBorderWeight, color: colors[type].pointBorder, fillColor: colors[type].point});
 
 
@@ -256,9 +253,19 @@ console.log(type, markers)
 
 
 	}
-	//if(type == "live")return;
 	var polyline = L.polyline(lineCoords, {color: colors[type].track, weight:1}).addTo(layers.geometry);
-	bigMap.fitBounds(polyline.getBounds());
+
+	//check if we're loading tracks and fit to track or to point
+	let check = (!!~["live", 'last'].indexOf(type)) && ($("#rawDataCheck:checked").length || $("#processedDataCheck:checked").length);
+	if (!check){
+		bigMap.fitBounds(polyline.getBounds());
+	}else{
+		bigMap.fitBounds(circle.getBounds());
+	}
+
+
+	
+	
 	
 	//L.geoJSON({"type": "LineString",	"coordinates":lineCoords}).addTo(layers.geometry);
 
