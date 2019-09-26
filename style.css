@@ -28,7 +28,8 @@ table tr>td:first-of-type{padding-right:5px;width:20%;}
 table tr:first-of-type input{width:97.5%;}
 table td.buttons>*{font-size:120%;padding: 5px 20px;}
 dataTypeSelector{display:block;font-size:100%;width:100%;margin-top:10px;margin-bottom:10px;}
-dataTypeSelector label{cursor:pointer;display:inline;margin-right:10px;}
+dataTypeSelector label{cursor:pointer;display:inline;margin-right:10px;white-space: nowrap}
 dataTypeSelector label>*{vertical-align: middle;display:inline-block;}
 dataTypeSelector label>input{margin:0px;width:16px;height:16px;}
-dataTypeSelector smallLoader{display:none;width:16px;height:16px;background-image: url(./smallLoader.gif)}
+dataTypeSelector label>noData{cursor:help;display:none;width:16px;height:16px;background-size: contain;background-image: url(./img/cancel.png)}
+dataTypeSelector label>smallLoader{display:none;width:16px;height:16px;background-image: url(./img/smallLoader.gif)}

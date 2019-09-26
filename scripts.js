@@ -77,7 +77,7 @@ function getData(){
 	let doRequest = function(type, cb){
 		let uri = "http://10.72.12.11:9005";
 		let request = new XMLHttpRequest();
-		let body = {}
+		let body = {"sender":"m2m","profile":"poisk","subscriberId":"msisdn"+msisdn,"priority":3,"hideTimes":[],"sources":["locations"],"inputs":undefined,"infolevel":1,"lang":"ru","startTime":fromTime,"endTime":tillTime}
 		if(!!~["raw", "processed"].indexOf(type)){
 			let dataArrObj = {
 				"raw": [12561,16384],
@@ -85,18 +85,23 @@ function getData(){
 			} 
 			
 			
-			let getDataArr = dataArrObj[type];
-			body = {"sender":"m2m","profile":"poisk","subscriberId":"msisdn"+msisdn,"priority":3,"hideTimes":[{"from":"2018-09-24T03:03:34.477Z","to":"2018-09-24T21:00:00.000Z"}],"sources":["locations"],"inputs":getDataArr,"infolevel":1,"lang":"ru","startTime":fromTime,"endTime":tillTime}
+			body.inputs = dataArrObj[type];
+			
 			request.open('POST', uri+ "/ldtdpsvc/rest/v0/ldtd/histvals");
 
-		}else if(!!~["live"].indexOf(type)){
+		}else if(!!~["last", "live"].indexOf(type)){
 			let literal = {
 				"last": "getLast",
 				"live": "getOnce"
 			} 
 			
-
-			body = {"sender":"m2m","profile":"poisk","subscriberId":"msisdn+79152103911","priority":3,"hideTimes":[],"sources":["locations"],"inputs":[12561,16384],"infolevel":1,"lang":"ru","age":60}
+			body.inputs = [12561,16384]
+			
+			if (type == "live"){
+				body.age = 60
+				delete body.startTime;
+				delete body.endTime;
+			}
 
 			request.open('POST', uri+ "/ldtdpsvc/rest/v0/ldtd/opervals?action="+ literal[type]);
 		}
@@ -114,7 +119,7 @@ function getData(){
 		    if (request.readyState === 4) {
 		       let ans = JSON.parse(request.responseText)
 		      
-		       if(!ans.inputValues && ans.inputs && ans.inputs.length){ans.inputValues = [{inputs:ans.inputs}]}
+		       if(!ans.inputValues && ans.inputs && ans.inputs.length){ans.inputValues = ans.inputs;delete ans.inputs;}
 		       if(!ans.inputValues){
 		       		cb("No data")
 		       		return
@@ -124,15 +129,6 @@ function getData(){
 		    }
 		}
 	}
-
-	layers.clear()
-
-	let msisdn = document.getElementById('msisdn').value
-
-
-	let fromTime = moment(document.getElementById('fromDate').value + ' ' + document.getElementById('fromTime').value+':59', 'DD.MM.YYYY HH:mm:ss').toISOString()
-	let tillTime = moment(document.getElementById('tillDate').value + ' ' + document.getElementById('tillTime').value+':59', 'DD.MM.YYYY HH:mm:ss').toISOString()
-
 
 	let requestAndDraw = function(types){
 		for(var i in types){
@@ -154,7 +150,17 @@ function getData(){
 		}		
 	}
 
-	requestAndDraw(['raw', 'processed', 'live'])
+	let msisdn = document.getElementById('msisdn').value
+
+
+	let fromTime = moment(document.getElementById('fromDate').value + ' ' + document.getElementById('fromTime').value+':59', 'DD.MM.YYYY HH:mm:ss').toISOString()
+	let tillTime = moment(document.getElementById('tillDate').value + ' ' + document.getElementById('tillTime').value+':59', 'DD.MM.YYYY HH:mm:ss').toISOString()
+
+
+	layers.clear()
+	$("noData[id$=NoData]:visible").hide();
+
+	requestAndDraw(['raw', 'processed', 'live', 'last'])
 }
 
 let draw = function(markers, type){
@@ -162,8 +168,27 @@ let draw = function(markers, type){
 	let usedCoords = {};
 	let index = 0;
 	let lineCoords = [];
-console.log(markers, type)
+
 	let colors = pointsColors;
+	
+	if(type == "live"){
+		if(!markers.inputValues[0].value){
+			$("#liveNoData").css("display", "inline-block");
+			return;
+		}
+		markers.inputValues = markers.inputValues.map(el => {
+			el.v = el.value;
+			el.i = el.input;
+			delete el.value;
+			delete el.input;
+			return el;
+		})
+
+		markers.inputValues = [{inputs: markers.inputValues}]
+	}
+
+console.log(type, markers)
+
 	for ( let i in markers.inputValues)
 	{
 		let currentMarker =  markers.inputValues[i];
@@ -193,7 +218,7 @@ console.log(markers, type)
 				text+="<br><b>Был там:</b> "+usedCoords[""+coords].length + "<br>"+usedCoords[""+coords].map(el => "<i>"+ el[1] +"</i>) "+ el[0]).join("<br />")+""
 				text = usedCoords[""+coords].map(el => el[1]).join(", ")+"</b><br />"+text
 			}else{
-				text = i+"</b><br />"+text
+				text = index+"</b><br />"+text
 			}
 			text = "<b>Точка № "+ text;
 
@@ -216,7 +241,7 @@ console.log(markers, type)
 
 
 	}
-	if(type == "live")return;
+	//if(type == "live")return;
 	var polyline = L.polyline(lineCoords, {color: colors[type].track, weight:1}).addTo(layers.geometry);
 	bigMap.fitBounds(polyline.getBounds());
 	

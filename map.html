@@ -45,18 +45,25 @@
 				<dataTypeSelector>
 					<label>
 						<smallLoader id="rawLoader"></smallLoader>
-						<input type='checkbox' id='rawDataCheck' name='dataTypeRaw' checked='checked'>
+						<input type='checkbox' id='rawDataCheck' name='dataTypeRaw'>
 						<span>Raw data</span>
 					</label>
 					<label>
 						<smallLoader id="processedLoader"></smallLoader>
-						<input type='checkbox' id='processedDataCheck' name='dataTypeProcess' checked='checked'>
+						<input type='checkbox' id='processedDataCheck' name='dataTypeProcess'>
 						<span>Processed</span>
 					</label>
 					<label>
 						<smallLoader id="liveLoader"></smallLoader>
-						<input type='checkbox' id='liveDataCheck' name='dataTypeLive' >
+						<input type='checkbox' id='liveDataCheck' name='dataTypeLive'  checked='checked' />
+						<noData id="liveNoData" title='Нет данных'></noData>
 						<span>Live data</span>
+					</label>
+					<label>
+						<smallLoader id="lastLoader"></smallLoader>
+						<input type='checkbox' id='lastDataCheck' name='dataTypeLast' />
+						<noData id="lastNoData" title='Нет данных'></noData>
+						<span>Last data</span>
 					</label>
 				</dataTypeSelector>	
 			</td>
