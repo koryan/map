@@ -18,14 +18,6 @@ let maxPointLengthInTooltip = 10;
 let prev = undefined;	
 
 
-let posMethodsColors = {
-	8192: "a00100",
-	4096: "afafaf",
-	2: "123456"
-
-}
-
-
 //init date & time
 $( function() {
     var dateFormat = "dd.mm.yy",
@@ -230,6 +222,11 @@ let draw = function(markers, type){
 			}
 			text = "<b>Точка № "+ text;
 
+			if(type == "raw"){
+				let posMethod = currentMarker.inputs[0].v.pos_method;
+				colors[type].pointBorder = colors[type].pointBorders[posMethod];
+			}
+
 			var circle  = L.circle(      [currentMarker.inputs[0].v.latitude, currentMarker.inputs[0].v.longitude],{radius: radius, weight: colors[type].circleBorderWeight, color: colors[type].circleBorder, fillColor: colors[type].circle, fillOpacity: .05});
 			let cCenter = L.circleMarker([currentMarker.inputs[0].v.latitude, currentMarker.inputs[0].v.longitude],{radius: 5,      weight: colors[type].circleBorderWeight, color: colors[type].pointBorder, fillColor: colors[type].point});
 
@@ -246,7 +243,7 @@ let draw = function(markers, type){
 		countRepeats = 1;
 		prev = ""+coords;
 	}
-	var polyline = L.polyline(lineCoords, {color: colors[type].track, weight:1}).addTo(layers.geometry);
+	var polyline = L.polyline(lineCoords, {color: colors[type].track.color, weight:colors[type].track.weight}).addTo(layers.geometry);
 
 	//check if we're loading tracks and fit to track or to point
 	let check = (!!~["live", 'last'].indexOf(type)) && ($("#rawDataCheck:checked").length || $("#processedDataCheck:checked").length);

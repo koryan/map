@@ -3,9 +3,18 @@ var pointsColors = {
 			"circleBorder": "darkred",
 			"circleBorderWeight": 0.5,
 			"circle": "lightgreen",
-			"pointBorder": "yellow",
+			"pointBorder": null,
+			"pointBorders": { //only for raw data
+				"0": "navy",
+				"8192": "yellow",
+				"4096": "green",
+				"2": "red"
+			},
 			"point": "lime",
-			"track": "blue",
+			"track": {
+				"color":"blue",
+				"weight":1
+			}
 		},
 		"processed": {
 			"circleBorder": "yellow",
@@ -13,7 +22,10 @@ var pointsColors = {
 			"circle": "orange",
 			"pointBorder": "green",
 			"point": "blue",
-			"track": "red",
+			"track": {
+				"color":"red",
+				"weight":1
+			},
 		},
 		"last": {
 			"circleBorder": "green",
@@ -21,7 +33,10 @@ var pointsColors = {
 			"circle": "red",
 			"pointBorder": "green",
 			"point": "blue",
-			"track": "green",
+			"track": {
+				"color":"blue",
+				"weight":1
+			},
 		},
 		"live":{
 			"circleBorder": "red",
@@ -29,6 +44,9 @@ var pointsColors = {
 			"circle": "blue",
 			"pointBorder": "green",
 			"point": "white",
-			"track": "green",
+			"track": {
+				"color":"blue",
+				"weight":1
+			},
 		}
 	}
