@@ -1,51 +1,93 @@
 var pointsColors = {
 		"raw": {
-			"circleBorder": "darkred",
-			"circleBorderWeight": 0.5,
-			"circle": "lightgreen",
-			"pointBorder": null,
-			"pointBorders": { //only for raw data
-				"0": "navy",
-				"8192": "yellow",
-				"4096": "green",
-				"2": "red"
+			"circle":{
+				"border":{
+					"color":"yellow",
+					"weight": 1
+				},
+				"background": "orange"
 			},
-			"point": "lime",
+			"point":{
+				"border": {
+					"color": null,
+					"weight": 1
+				},
+				"borders": {	//only for raw data
+					"0": "navy",
+					"8192": "yellow",
+					"4096": "green",
+					"2": "red"
+				},
+				"background": null,
+				"backgrounds": {	//only for raw data
+					"0": "red",
+					"8192": "green",
+					"4096": "yellow",
+					"2": "navy"
+				},
+			},
 			"track": {
-				"color":"blue",
+				"color":"red",
 				"weight":1
 			}
 		},
 		"processed": {
-			"circleBorder": "yellow",
-			"circleBorderWeight": 1,
-			"circle": "orange",
-			"pointBorder": "green",
-			"point": "blue",
+			"circle":{
+				"border":{
+					"color":"yellow",
+					"weight": 1
+				},
+				"background": "orange"
+			},
+			"point":{
+				"border":{
+					"color":"green",
+					"weight": 1
+				},
+				"background": "blue"
+			},
 			"track": {
 				"color":"red",
 				"weight":1
 			},
 		},
 		"last": {
-			"circleBorder": "green",
-			"circleBorderWeight": 1,
-			"circle": "red",
-			"pointBorder": "green",
-			"point": "blue",
+			"circle":{
+				"border":{
+					"color":"yellow",
+					"weight": 1
+				},
+				"background": "orange"
+			},
+			"point":{
+				"border":{
+					"color":"green",
+					"weight": 1
+				},
+				"background": "blue"
+			},
 			"track": {
-				"color":"blue",
+				"color":"red",
 				"weight":1
 			},
 		},
 		"live":{
-			"circleBorder": "red",
-			"circleBorderWeight": 1,
-			"circle": "blue",
-			"pointBorder": "green",
-			"point": "white",
+			"circle":{
+				"border":{
+					"color":"yellow",
+					"weight": 1
+				},
+				"background": "orange"
+			},
+			"point":{
+				"border":{
+					"color":"green",
+					"weight": 1
+				},
+				"background": "blue"
+			},
 			"track": {
-				"color":"blue",
+				"color":"red",
 				"weight":1
 			},
 		}

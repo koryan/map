@@ -224,11 +224,12 @@ let draw = function(markers, type){
 
 			if(type == "raw"){
 				let posMethod = currentMarker.inputs[0].v.pos_method;
-				colors[type].pointBorder = colors[type].pointBorders[posMethod];
+				colors[type].point.border.color = colors[type].point.borders[posMethod];
+				colors[type].point.background = colors[type].point.backgrounds[posMethod];
 			}
 
-			var circle  = L.circle(      [currentMarker.inputs[0].v.latitude, currentMarker.inputs[0].v.longitude],{radius: radius, weight: colors[type].circleBorderWeight, color: colors[type].circleBorder, fillColor: colors[type].circle, fillOpacity: .05});
-			let cCenter = L.circleMarker([currentMarker.inputs[0].v.latitude, currentMarker.inputs[0].v.longitude],{radius: 5,      weight: colors[type].circleBorderWeight, color: colors[type].pointBorder, fillColor: colors[type].point});
+			var circle  = L.circle(      [currentMarker.inputs[0].v.latitude, currentMarker.inputs[0].v.longitude],{radius: radius, weight: colors[type].circle.border.weight, color: colors[type].circle.border.color, fillColor: colors[type].circle.background, fillOpacity: .05});
+			let cCenter = L.circleMarker([currentMarker.inputs[0].v.latitude, currentMarker.inputs[0].v.longitude],{radius: 5,      weight: colors[type].point.border.weight,  color: colors[type].point.border.color, fillColor: colors[type].point.background});
 
 
 			//if (usedCoords[""+coords].length > maxPointLengthInTooltip)
