@@ -73,7 +73,67 @@ document.addEventListener('click', function (event) {
 	if(event.target.matches('#clear')){
 		layers.clear()
 	}
+
+	if(event.target.matches('#csv')){
+		layers.clear()
+	}
+
+	
 }, false);
+
+
+let drawCsv = function(csvData){
+	layers.clear()
+	let csvToJson = function(csv){
+			let answer = [];
+			let objKeys = [];
+			let lines = csv.split('\n');
+		    for(let i = 0; i < lines.length; i++){
+		    	if (lines[i] == "")continue;
+		    	let colomns = lines[i].split(',') 
+		    	let obj = {};
+		    	for(let j = 0; j < colomns.length; j++){
+		      		let val = colomns[j];
+		      		
+		      		if (i == 0){ 
+						objKeys.push(val.trim());
+		      		}else{
+		      			obj[objKeys[j]] = val;
+		      		}
+		  		}
+		  		if(i != 0)answer.push(obj);
+		    }
+
+		    return answer;
+		}
+
+	let data = csvToJson(csvData).map(el => {
+		let obj = {};
+		obj.lon = +el.lon;
+		obj.lat = +el.lat;
+		obj.radius = +el.radius;
+		obj.text = el.text;
+		obj.color = el.color;	
+		return obj;
+	})
+
+	
+	let csvColors = csvSettings; //from colors.json
+	
+	let circlesArr = [];
+	for(let i in data){
+		let zone = data[i];
+		if(!zone.color)zone.color = csvColors.defaultColor;
+		var circle = L.circle([zone.lat, zone.lon],{radius: zone.radius, weight:0, fillColor: zone.color, fillOpacity: csvColors.opacity});
+		circle.bindTooltip(zone.text, {className: 'myTooltip'})
+		circlesArr.push(circle);
+		
+	}
+	var featureGroup = L.featureGroup(circlesArr).addTo(layers.markersLayer);
+
+	bigMap.fitBounds(featureGroup.getBounds());
+	
+}
 
 function getData(){
 	let doRequest = function(type, cb){
@@ -119,14 +179,19 @@ function getData(){
 			
 
 		    if (request.readyState === 4) {
-		       let ans = JSON.parse(request.responseText)
-		      
-		       if(!ans.inputValues && ans.inputs && ans.inputs.length){ans.inputValues = ans.inputs;delete ans.inputs;}
-		       if(!ans.inputValues){
-		       		cb("No data")
-		       		return
-		       }
-		       cb(false, ans)		       
+		   	   if(request.responseText){
+			       let ans = JSON.parse(request.responseText)
+			      
+			       if(!ans.inputValues && ans.inputs && ans.inputs.length){ans.inputValues = ans.inputs;delete ans.inputs;}
+			       if(!ans.inputValues){
+			       		cb("No data")
+			       		return
+			       }
+
+			       cb(false, ans)	
+			       return;
+			   }
+		       cb("Error on loading data \""+ type +"\"")    
 
 		    }
 		}
@@ -155,6 +220,7 @@ function getData(){
 			}
 		}		
 	}
+
 
 	let msisdn = document.getElementById('msisdn').value
 
@@ -282,3 +348,14 @@ var mapInit = function(){
 	L.control.layers(baseLayers, overlays).addTo(bigMap);
 }
 
+
+let openCsv = function(e){
+	var input = e.target;
+
+    var reader = new FileReader();
+    reader.onload = function(){
+		//let result = reader.result;
+		drawCsv(reader.result)
+    };
+    reader.readAsText(input.files[0]);
+}

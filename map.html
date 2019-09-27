@@ -49,7 +49,7 @@
 				<dataTypeSelector>
 					<label>
 						<smallLoader id="rawLoader"></smallLoader>
-						<input type='checkbox' id='rawDataCheck' name='dataTypeRaw' checked='checked'>
+						<input type='checkbox' id='rawDataCheck' name='dataTypeRaw' />
 						<noData id="rawNoData" title='Нет данных'></noData>
 						<span>Raw data</span>
 					</label>
@@ -77,7 +77,13 @@
 		<tr>
 			<td colspan="2" class='buttons'>
 				<input type='submit' id='submit' value='Запрос'>
-				<input type='submit' id='clear' value='Очистить'>
+				<input type='button' id='clear' value='Очистить'>
+				
+				
+				<button class='csv' title='Загрузить CSV' ><label for='csv'><img src='./img/csv.png' /></label></button>
+				<input type='file' id='csv' accept='.csv' onchange='openCsv(event)'>
+				
+
 			</td>
 		</tr>
 	</table>

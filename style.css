@@ -26,7 +26,12 @@ table tr.datetime input{width:48%;}
 table tr>td{padding:0px;}
 table tr>td:first-of-type{padding-right:5px;width:20%;}
 table tr:first-of-type input{width:97.5%;}
-table td.buttons>*{font-size:120%;padding: 5px 20px;}
+table td.buttons>*{display:inline-block;vertical-align: middle;}
+table td.buttons input{font-size:120%;padding: 5px 20px;}
+table td.buttons>#csv{width:0px;padding:0px;}
+table td.buttons button.csv{padding-top:6px;padding-bottom:3px}
+table td.buttons button.csv img{height: 1.8em;}
+
 dataTypeSelector{display:block;font-size:100%;width:100%;margin-top:10px;margin-bottom:10px;}
 dataTypeSelector label{cursor:pointer;display:inline;margin-right:10px;white-space: nowrap}
 dataTypeSelector label>*{vertical-align: middle;display:inline-block;}
