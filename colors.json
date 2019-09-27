@@ -12,14 +12,14 @@ var pointsColors = {
 					"color": null,
 					"weight": 1
 				},
-				"borders": {	//only for raw data
+				"borders": {	//only for raw data (posMethod)
 					"0": "navy",
 					"8192": "yellow",
 					"4096": "green",
 					"2": "red"
 				},
 				"background": null,
-				"backgrounds": {	//only for raw data
+				"backgrounds": {	//only for raw data (posMethod)
 					"0": "red",
 					"8192": "green",
 					"4096": "yellow",
