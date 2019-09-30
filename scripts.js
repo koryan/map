@@ -240,7 +240,7 @@ let draw = function(markers, type){
 	let index = 0;
 	let lineCoords = [];
 
-	let colors = pointsColors;
+	let colors = pointsColorsSettings;
 	
 	if(type == "live"){
 		if(!markers.inputValues[0].value){
