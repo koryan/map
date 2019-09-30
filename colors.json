@@ -2,7 +2,7 @@ var pointsColorsSettings = {
 		"raw": {
 			"circle":{
 				"border":{
-					"color":"yellow",
+					"color":"black",
 					"weight": 1
 				},
 				"background": "orange"
@@ -13,10 +13,10 @@ var pointsColorsSettings = {
 					"weight": 1
 				},
 				"borders": {	//only for raw data (posMethod)
-					"0": "navy",
-					"8192": "yellow",
-					"4096": "green",
-					"2": "red"
+					"0": "red",
+					"8192": "green",
+					"4096": "yellow",
+					"2": "blue"
 				},
 				"background": null,
 				"backgrounds": {	//only for raw data (posMethod)
@@ -27,8 +27,8 @@ var pointsColorsSettings = {
 				},
 			},
 			"track": {
-				"color":"red",
-				"weight":1
+				"color":"blue",
+				"weight":2
 			}
 		},
 		"processed": {
@@ -48,7 +48,7 @@ var pointsColorsSettings = {
 			},
 			"track": {
 				"color":"red",
-				"weight":2
+				"weight":3
 			},
 		},
 		"last": {
