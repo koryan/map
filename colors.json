@@ -34,21 +34,21 @@ var pointsColorsSettings = {
 		"processed": {
 			"circle":{
 				"border":{
-					"color":"yellow",
+					"color":"red",
 					"weight": 1
 				},
-				"background": "orange"
+				"background": "red"
 			},
 			"point":{
 				"border":{
-					"color":"green",
+					"color":"red",
 					"weight": 1
 				},
-				"background": "blue"
+				"background": "red"
 			},
 			"track": {
 				"color":"red",
-				"weight":1
+				"weight":2
 			},
 		},
 		"last": {
