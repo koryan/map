@@ -95,5 +95,9 @@ var pointsColorsSettings = {
 
 var csvSettings = {
 	"defaultColor": "red",
-	"opacity": 0.7
+	"opacity": 0.7,
+	"track": {
+		"weight":3,
+		"color": "green" 
+	}
 }

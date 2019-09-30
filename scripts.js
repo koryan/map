@@ -119,18 +119,20 @@ let drawCsv = function(csvData){
 
 	
 	let csvColors = csvSettings; //from colors.json
-	
+	let trackCoords = [];
 	let circlesArr = [];
 	for(let i in data){
 		let zone = data[i];
 		if(!zone.color)zone.color = csvColors.defaultColor;
+		trackCoords.push([zone.lat, zone.lon])
 		var circle = L.circle([zone.lat, zone.lon],{radius: zone.radius, weight:0, fillColor: zone.color, fillOpacity: csvColors.opacity});
 		circle.bindTooltip(zone.text, {className: 'myTooltip'})
 		circlesArr.push(circle);
 		
 	}
 	var featureGroup = L.featureGroup(circlesArr).addTo(layers.markersLayer);
-
+	L.polyline(trackCoords, {color: csvColors.track.color, weight:csvColors.track.weight}).addTo(layers.geometry);
+	
 	bigMap.fitBounds(featureGroup.getBounds());
 	
 }
