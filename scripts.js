@@ -10,6 +10,7 @@ var layers = {
 		this.markersLayer.clearLayers();
 		this.pointsLayer.clearLayers();
 		this.geometry.clearLayers();
+		$("div.pointInfo").html("<i>Click on point to get it data</i>")
 	}
 }
 
@@ -242,7 +243,7 @@ let draw = function(markers, type){
 	let index = 0;
 	let lineCoords = [];
 
-	let colors = pointsColorsSettings;
+	let colors = pointsColorsSettings;  //from colors.json
 	
 	if(type == "live"){
 		if(!markers.inputValues[0].value){
@@ -264,51 +265,60 @@ let draw = function(markers, type){
 	{
 		let currentMarker =  markers.inputValues[i];
 
-		let coords = [currentMarker.inputs[0].v.latitude, currentMarker.inputs[0].v.longitude,];
+		let coords = [currentMarker.inputs[0].v.latitude, currentMarker.inputs[0].v.longitude];
 		let radius = currentMarker.inputs[0].v.radius
 		let currentTime = moment(currentMarker.inputs[1].v).format("HH:mm:ss DD.MM")
 		
-		//if (""+coords != ""+prev){
-			lineCoords.push(coords);
-			index ++;
+		
+		lineCoords.push(coords);
+		index ++;
 
-			if(!usedCoords[""+coords]){
-				usedCoords[""+coords] = [[currentTime, i]];
-			}else{
-				usedCoords[""+coords].push([currentTime, i]);
-			}
-
-			let text = 
-				"<b>Радиус:</b> "+radius+"<br>"+
-				"<b>Время:</b> "+ currentTime
-
-			if(usedCoords[""+coords].length > 1){
-				text+="<br><b>Был там:</b> "+usedCoords[""+coords].length + "<br>"+usedCoords[""+coords].map(el => "<i>"+ el[1] +"</i>) "+ el[0]).join("<br />")+""
-				text = usedCoords[""+coords].map(el => el[1]).join(", ")+"</b><br />"+text
-			}else{
-				text = index+"</b><br />"+text
-			}
-			text = "<b>Точка № "+ text;
-
-			if(type == "raw"){
-				let posMethod = currentMarker.inputs[0].v.pos_method;
-				colors[type].point.border.color = colors[type].point.borders[posMethod];
-				colors[type].point.background = colors[type].point.backgrounds[posMethod];
-			}
-
-			var circle  = L.circle(      [currentMarker.inputs[0].v.latitude, currentMarker.inputs[0].v.longitude],{radius: radius, weight: colors[type].circle.border.weight, color: colors[type].circle.border.color, fillColor: colors[type].circle.background, fillOpacity: .05});
-			let cCenter = L.circleMarker([currentMarker.inputs[0].v.latitude, currentMarker.inputs[0].v.longitude],{radius: 5,      weight: colors[type].point.border.weight,  color: colors[type].point.border.color, fillColor: colors[type].point.background});
+		if(!usedCoords[""+coords]){
+			usedCoords[""+coords] = [[currentTime, i]];
+		}else{
+			usedCoords[""+coords].push([currentTime, i]);
+		}
 
 
-			//if (usedCoords[""+coords].length > maxPointLengthInTooltip)
-			cCenter.bindPopup(text).bindTooltip(text, {className: 'myTooltip'})
-			circle.bindTooltip(text, {className: 'myTooltip'})
-			circle.addTo(layers.markersLayer)
-			cCenter.addTo(layers.pointsLayer)
+		
+
+		let text = "<b>Радиус:</b> "+radius+"<br>"
+		let pointsListText = ""
+
+		text+="<b>Был там:</b> "+usedCoords[""+coords].length + "<br>"
+		pointsListText+=usedCoords[""+coords].map(el => "<i>"+ el[1] +"</i>) "+ el[0]).join("<br />")+""
+		if (usedCoords[""+coords].length <= maxPointLengthInTooltip){
+			text += pointsListText;
+		}else{
+			text += "Click it!"
+		}
+
+		
+		if(type == "raw"){
+			let posMethod = currentMarker.inputs[0].v.pos_method;
+			colors[type].point.border.color = colors[type].point.borders[posMethod];
+			colors[type].point.background = colors[type].point.backgrounds[posMethod];
+		}
+
+		var circle  = L.circle(      coords,{radius: radius, weight: colors[type].circle.border.weight, color: colors[type].circle.border.color, fillColor: colors[type].circle.background, fillOpacity: .05});
+		let cCenter = L.circleMarker(coords,{text:pointsListText, radius: 10,     weight: colors[type].point.border.weight,  color: colors[type].point.border.color, fillColor: colors[type].point.background});
+
+
+		if (usedCoords[""+coords].length > maxPointLengthInTooltip)
+
+		cCenter.bindTooltip(text, {className: 'myTooltip'})
+		circle.bindTooltip(text, {className: 'myTooltip'})
+		circle.addTo(layers.markersLayer).on('click', function(e){
+			$("div#pointInfo").html(e.target.options.text)
+			console.log("11",e)
+		})
+		cCenter.addTo(layers.pointsLayer).on('click', function(e){
+			$("div#pointInfo").html(e.target.options.text)
+			console.log("11",e)
+		})
+		
 			
-			timeStart = currentTime
-			
-		//}	
+		
 		countRepeats = 1;
 		prev = ""+coords;
 	}
