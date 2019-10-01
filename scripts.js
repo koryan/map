@@ -6,10 +6,12 @@ var layers = {
 	pointsLayer: L.layerGroup(),
 	cities: L.layerGroup(),
 	geometry: L.layerGroup(),
+	geozones: L.layerGroup(),
 	clear: function(){
 		this.markersLayer.clearLayers();
 		this.pointsLayer.clearLayers();
 		this.geometry.clearLayers();
+		this.geozones.clearLayers();
 		$("div.pointInfo").html("<i>Click on point to get it data</i>")
 	}
 }
@@ -139,68 +141,70 @@ let drawCsv = function(csvData){
 }
 
 function getData(){
-	let doRequest = function(type, cb){
-		let uri = "http://10.72.12.11:9005";
-		let request = new XMLHttpRequest();
-		let body = {"sender":"m2m","profile":"poisk","subscriberId":"msisdn"+msisdn,"priority":3,"hideTimes":[],"sources":["locations"],"inputs":undefined,"infolevel":1,"lang":"ru","startTime":fromTime,"endTime":tillTime}
-		if(!!~["raw", "processed"].indexOf(type)){
-			let dataArrObj = {
-				"raw": [12561,16384],
-				"processed": [13001,16384]
-			} 
-			
-			
-			body.inputs = dataArrObj[type];
-			
-			request.open('POST', uri+ "/ldtdpsvc/rest/v0/ldtd/histvals");
+	
+	let requestAndDraw = function(types){
+		let doRequest = function(type, cb){
+			let uri = "http://10.72.12.11:9005";
+			let request = new XMLHttpRequest();
+			let body = {"sender":"m2m","profile":"poisk","subscriberId":"msisdn"+msisdn,"priority":3,"hideTimes":[],"sources":["locations"],"inputs":undefined,"infolevel":1,"lang":"ru","startTime":fromTime,"endTime":tillTime}
+			if(!!~["raw", "processed"].indexOf(type)){
+				let dataArrObj = {
+					"raw": [12561,16384],
+					"processed": [13001,16384]
+				} 
+				
+				
+				body.inputs = dataArrObj[type];
+				
+				request.open('POST', uri+ "/ldtdpsvc/rest/v0/ldtd/histvals");
 
-		}else if(!!~["last", "live"].indexOf(type)){
-			let literal = {
-				"last": "getLast",
-				"live": "getOnce"
-			} 
-			
-			body.inputs = [12561,16384]
-			
-			if (type == "live"){
-				body.age = 60
-				delete body.startTime;
-				delete body.endTime;
+			}else if(!!~["last", "live"].indexOf(type)){
+				let literal = {
+					"last": "getLast",
+					"live": "getOnce"
+				} 
+				
+				body.inputs = [12561,16384]
+				
+				if (type == "live"){
+					body.age = 60
+					delete body.startTime;
+					delete body.endTime;
+				}
+
+				request.open('POST', uri+ "/ldtdpsvc/rest/v0/ldtd/opervals?action="+ literal[type]);
 			}
 
-			request.open('POST', uri+ "/ldtdpsvc/rest/v0/ldtd/opervals?action="+ literal[type]);
-		}
-
-		
-		request.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
-		request.setRequestHeader('Authorization', 'Basic bGR0ZHB1c2VyMTp7QTMlcn1zb342dmI=');
-		request.setRequestHeader('Accept', 'application/json');
-
-		request.send(JSON.stringify(body));
-
-		request.onreadystatechange = function () {
 			
+			request.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+			request.setRequestHeader('Authorization', 'Basic bGR0ZHB1c2VyMTp7QTMlcn1zb342dmI=');
+			request.setRequestHeader('Accept', 'application/json');
 
-		    if (request.readyState === 4) {
-		   	   if(request.responseText){
-			       let ans = JSON.parse(request.responseText)
-			      
-			       if(!ans.inputValues && ans.inputs && ans.inputs.length){ans.inputValues = ans.inputs;delete ans.inputs;}
-			       if(!ans.inputValues){
-			       		cb("No data")
-			       		return
-			       }
+			request.send(JSON.stringify(body));
 
-			       cb(false, ans)	
-			       return;
-			   }
-		       cb("Error on loading data \""+ type +"\"")    
+			request.onreadystatechange = function () {
+				
 
-		    }
+			    if (request.readyState === 4) {
+			   	   if(request.responseText){
+				       let ans = JSON.parse(request.responseText)
+				      
+				       if(!ans.inputValues && ans.inputs && ans.inputs.length){ans.inputValues = ans.inputs;delete ans.inputs;}
+				       if(!ans.inputValues){
+				       		cb("No data")
+				       		return
+				       }
+
+				       cb(false, ans)	
+				       return;
+				   }
+			       cb("Error on loading data \""+ type +"\"")    
+
+			    }
+			}
 		}
-	}
 
-	let requestAndDraw = function(types){
+
 		for(var i in types){
 			let curType = types[i];
 			if($("#"+ curType +"DataCheck:checked").length){
@@ -224,6 +228,52 @@ function getData(){
 		}		
 	}
 
+	let drawGeozones = function(){
+		let magicEmpiricalNumber = 62661.2321733;
+		let doRequest = function(cb){
+
+			let uri = "geozones.json";//"http://10.72.12.98:50001/geo?msisdn="+msisdn;
+			let request = new XMLHttpRequest();
+			request.open('GET', uri);
+			request.send();
+
+			request.onreadystatechange = function () {		
+			    if (request.readyState === 4) {
+					try{
+						let ans = JSON.parse(request.responseText)				      
+				    	cb(false, ans)	
+				    	return;
+				    }catch(err){
+				    	cb(err)
+				    	return
+				    }
+				    cb("Can't get geozones");
+				    return;
+				}
+			}
+		}
+		let geoArr = [];
+		let gzSettings = geozonesSettings; //from colors.json
+		doRequest(function(err, data){
+			if(err){
+				console.log(err);//alert(err)	
+				return;
+			}
+			console.log("geozones", data)
+			geoArr = data.map(gz => {
+				let text = "<b>Название: </b>"+gz.name
+				if(gz.poiArea.length){
+					return L.polygon(gz.poiArea, {color: gzSettings.border.color, weight:gzSettings.border.weight, fillColor: gzSettings.color, fillOpacity: gzSettings.opacity}).bindTooltip(text, {className: 'myTooltip'});
+				}else{ //cirle
+					let radius =  Math.round(gz.poiCenter[2]*magicEmpiricalNumber)
+					console.log(gz.name, gz.poiCenter, radius)
+					text += "<br><b>Радиус:</b> "+ radius
+					return L.circle([gz.poiCenter[0], gz.poiCenter[1]],{radius: radius, color: gzSettings.border.color, weight:gzSettings.border.weight, fillColor: gzSettings.color, fillOpacity: gzSettings.opacity}).bindTooltip(text, {className: 'myTooltip'});
+				}
+			}).filter(el => el);
+			L.featureGroup(geoArr).addTo(layers.geozones);
+		})
+	}
 
 	let msisdn = document.getElementById('msisdn').value
 
@@ -234,6 +284,7 @@ function getData(){
 
 	layers.clear()
 	$("noData[id$=NoData]:visible").hide();
+	drawGeozones()
 	requestAndDraw(['raw', 'processed', 'live', 'last'])
 }
 
@@ -343,7 +394,7 @@ var mapInit = function(){
 	bigMap = L.map('map', {
 		center: [55.751244, 37.618423],
 		zoom: 12,
-		layers: [grayscale, layers.cities, layers.geometry, layers.markersLayer, layers.pointsLayer]
+		layers: [grayscale, layers.cities, layers.geometry, layers.markersLayer, layers.pointsLayer]//, layers.geozones]
 	});
 
 	var baseLayers = {
@@ -353,8 +404,9 @@ var mapInit = function(){
 
 	var overlays = {
 		"Трек": layers.geometry,
-		"Радиусы":layers.markersLayer,
-		"Точки":layers.pointsLayer
+		"Радиусы": layers.markersLayer,
+		"Точки": layers.pointsLayer,
+		"Геозоны": layers.geozones
 	};
 
 	L.control.layers(baseLayers, overlays).addTo(bigMap);
