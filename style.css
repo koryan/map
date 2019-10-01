@@ -18,7 +18,7 @@ body{
 	border-radius: 10px	 
 }
 #controls{flex: 25%;padding:15px 20px;}
-#controls table{width:100%;}
+#controls table{width:100%;margin-bottom:20px;}
 #controls table>caption{text-align: left;font-weight:bold;margin-bottom:15px;font-size:110%;}
 #ui-datepicker-div{z-index:1000;}
 table input{padding:0px 3px;font-size:90%;text-align:right;box-sizing: border-box; }
@@ -31,6 +31,9 @@ table td.buttons input{font-size:120%;padding: 5px 20px;}
 table td.buttons>#csv{width:0px;padding:0px;}
 table td.buttons button.csv{padding-top:6px;padding-bottom:3px}
 table td.buttons button.csv img{height: 1.8em;}
+
+div#pointInfo{border:1px dashed gray;position:relative;padding:10px 5px 4px;font-size:90%;}
+div#pointInfo:before{content:"Информация по точке";background-color:white;position:absolute;font-size: 90%;top: -9px;left: 8px;}
 
 dataTypeSelector{display:block;font-size:100%;width:100%;margin-top:10px;margin-bottom:10px;}
 dataTypeSelector label{cursor:pointer;display:inline;margin-right:10px;white-space: nowrap}
