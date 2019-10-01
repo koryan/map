@@ -54,8 +54,8 @@ var pointsColorsSettings = {
 		"last": {
 			"circle":{
 				"border":{
-					"color":"yellow",
-					"weight": 1
+					"color":"red",
+					"weight": 4
 				},
 				"background": "orange"
 			},
