@@ -14,14 +14,14 @@ var pointsColorsSettings = {
 				},
 				"borders": {	//only for raw data (posMethod)
 					"0": "red",
-					"8192": "green",
+					"8192": "orange",
 					"4096": "yellow",
 					"2": "blue"
 				},
 				"background": null,
 				"backgrounds": {	//only for raw data (posMethod)
 					"0": "red",
-					"8192": "green",
+					"8192": "orange",
 					"4096": "yellow",
 					"2": "navy"
 				},
