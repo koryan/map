@@ -144,7 +144,7 @@ function getData(){
 	
 	let requestAndDraw = function(types){
 		let doRequest = function(type, cb){
-			let uri = "http://10.72.12.11:9005";
+			let uri = "http://10.72.12.98";
 			let request = new XMLHttpRequest();
 			let body = {"sender":"m2m","profile":"poisk","subscriberId":"msisdn"+msisdn,"priority":3,"hideTimes":[],"sources":["locations"],"inputs":undefined,"infolevel":1,"lang":"ru","startTime":fromTime,"endTime":tillTime}
 			if(!!~["raw", "processed"].indexOf(type)){
@@ -232,7 +232,7 @@ function getData(){
 		let magicEmpiricalNumber = 62661.2321733;
 		let doRequest = function(cb){
 
-			let uri = "geozones.json";//"http://10.72.12.98:50001/geo?msisdn="+msisdn;
+			let uri = "http://10.72.12.98/geo?msisdn="+msisdn;//"geozones.json";
 			let request = new XMLHttpRequest();
 			request.open('GET', uri);
 			request.send();
@@ -394,7 +394,7 @@ var mapInit = function(){
 	bigMap = L.map('map', {
 		center: [55.751244, 37.618423],
 		zoom: 12,
-		layers: [grayscale, layers.cities, layers.geometry, layers.markersLayer, layers.pointsLayer]//, layers.geozones]
+		layers: [grayscale, layers.cities, layers.geometry, layers.markersLayer, layers.pointsLayer, layers.geozones]
 	});
 
 	var baseLayers = {
