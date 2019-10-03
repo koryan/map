@@ -44,7 +44,7 @@ $( function() {
  
       return date;
     }
-    $("#msisdn").val(defaultMsisdn);
+    
 
     let tpParams = {
 	    timeFormat: 'HH:mm',
@@ -63,26 +63,33 @@ $( function() {
 
 document.addEventListener("DOMContentLoaded", function() {
 	mapInit()
-	getData()
+	//getData()
+	$('#putIvansNumber').click(function(){
+		$("#msisdn").val(defaultMsisdn);
+	})
+
+	$("#clear").click(function(){
+		layers.clear()
+	})
+
+
+
+	$('.buttons>*').click(function(e){
+		let type = e.currentTarget.id
+		if(!!~['raw','processed', 'live', 'last', 'geozones'].indexOf(type)){
+			getData(type)
+		}else if(!!~['cvs','clear'].indexOf(type)){
+			layers.clear()
+		}
+	})
+
+	if(window.location.protocol == "file:"){
+		$("#msisdn").val(defaultMsisdn);
+	}
 });
 
 
 
-
-document.addEventListener('click', function (event) {	
-	if (event.target.matches('#submit')){
-		getData()
-	}
-	if(event.target.matches('#clear')){
-		layers.clear()
-	}
-
-	if(event.target.matches('#csv')){
-		layers.clear()
-	}
-
-	
-}, false);
 
 
 let drawCsv = function(csvData){
@@ -140,92 +147,61 @@ let drawCsv = function(csvData){
 	
 }
 
-function getData(){
+function getData(type){
 	
-	let requestAndDraw = function(types){
+	let requestAndDraw = function(type){
 		let doRequest = function(type, cb){
-			let uri = "http://10.72.12.98";
-			let request = new XMLHttpRequest();
-			let body = {"sender":"m2m","profile":"poisk","subscriberId":"msisdn"+msisdn,"priority":3,"hideTimes":[],"sources":["locations"],"inputs":undefined,"infolevel":1,"lang":"ru","startTime":fromTime,"endTime":tillTime}
-			if(!!~["raw", "processed"].indexOf(type)){
-				let dataArrObj = {
-					"raw": [12561,16384],
-					"processed": [13001,16384]
-				} 
-				
-				
-				body.inputs = dataArrObj[type];
-				
-				request.open('POST', uri+ "/ldtdpsvc/rest/v0/ldtd/histvals");
-
-			}else if(!!~["last", "live"].indexOf(type)){
-				let literal = {
-					"last": "getLast",
-					"live": "getOnce"
-				} 
-				
-				body.inputs = [12561,16384]
-				
-				if (type == "live"){
-					body.age = 60
-					delete body.startTime;
-					delete body.endTime;
+			let uri = "http://10.72.12.98:80/coords?msisdn="+ msisdn +"&startTime="+ fromTime +"&endTime="+ tillTime +"&type="+ type;
+			fetch(uri).then(function(response){
+	
+				if(response.status !== 200){
+					cb(response.status, response)
+					return;
 				}
-
-				request.open('POST', uri+ "/ldtdpsvc/rest/v0/ldtd/opervals?action="+ literal[type]);
-			}
-
-			
-			request.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
-			request.setRequestHeader('Authorization', 'Basic bGR0ZHB1c2VyMTp7QTMlcn1zb342dmI=');
-			request.setRequestHeader('Accept', 'application/json');
-
-			request.send(JSON.stringify(body));
-
-			request.onreadystatechange = function () {
 				
+				response.json().then(function(data) {  
+			        console.log(data);  
 
-			    if (request.readyState === 4) {
-			   	   if(request.responseText){
-				       let ans = JSON.parse(request.responseText)
-				      
-				       if(!ans.inputValues && ans.inputs && ans.inputs.length){ans.inputValues = ans.inputs;delete ans.inputs;}
-				       if(!ans.inputValues){
-				       		cb("No data")
-				       		return
-				       }
-
-				       cb(false, ans)	
-				       return;
-				   }
-			       cb("Error on loading data \""+ type +"\"")    
-
-			    }
-			}
+			        //rename values for live data
+			        if(!data.inputValues && data.inputs && data.inputs.length){data.inputValues = data.inputs;delete data.inputs;}
+					if(!data.inputValues){
+						cb("No data")
+						return
+					}
+					cb(false, data)	
+			    });  
+		    }).catch(function(err) {  
+		    	console.log(err)
+			    cb(err);
+			});
+			
 		}
 
 
-		for(var i in types){
-			let curType = types[i];
-			if($("#"+ curType +"DataCheck:checked").length){
+		
+		
 
-				$("#"+ curType +"Loader").css("display", "inline-block");
-				$("#"+ curType +"DataCheck").hide()
-				doRequest(curType, function(err, data){
-					$("#"+ curType +"Loader").hide();
-					$("#"+ curType +"DataCheck").css("display", "inline-block");
-					if(err){
-						if(err == "No data"){
-							$("#"+ curType +"NoData").css("display", "inline-block");
-						}else{
-							alert(err)	
-						}
-						return;
-					}
-					draw(data, curType)
-				})
+		$("#"+ type +">smallLoader").css("display", "block")
+		$("#"+ type +">span").css("visibility", "hidden");
+		$("#"+ type).prop( "disabled", true );
+
+		doRequest(type, function(err, data){
+			$("#"+ type +">smallLoader").css("display", "none")
+			$("#"+ type +">span").css("visibility", "visible");
+			$("#"+ type).prop( "disabled", false );
+			if(err){
+				if(err == "No data"){
+					$("#"+ type +">noData").show();
+				}else{
+					console.log(err, data)
+					alert("Ошибка загрузки данных")	
+				}
+				return;
 			}
-		}		
+			draw(data, type)
+		})
+		
+			
 	}
 
 	let drawGeozones = function(){
@@ -254,38 +230,58 @@ function getData(){
 		}
 		let geoArr = [];
 		let gzSettings = geozonesSettings; //from colors.json
+
+
+		$("#geozones>smallLoader").css("display", "block")
+		$("#geozones>span").css("visibility", "hidden");
+		$("#geozones").prop( "disabled", true );
 		doRequest(function(err, data){
+			$("#geozones>smallLoader").css("display", "none")
+			$("#geozones>span").css("visibility", "visible");
+			$("#geozones").prop( "disabled", false );
 			if(err){
-				console.log(err);//alert(err)	
+				alert("Ошибка загрузки геозон")
+				console.log(err);
 				return;
 			}
-			console.log("geozones", data)
 			geoArr = data.map(gz => {
 				let text = "<b>Название: </b>"+gz.name
 				if(gz.poiArea.length){
 					return L.polygon(gz.poiArea, {color: gzSettings.border.color, weight:gzSettings.border.weight, fillColor: gzSettings.color, fillOpacity: gzSettings.opacity}).bindTooltip(text, {className: 'myTooltip'});
 				}else{ //cirle
 					let radius =  Math.round(gz.poiCenter[2]*magicEmpiricalNumber)
-					console.log(gz.name, gz.poiCenter, radius)
 					text += "<br><b>Радиус:</b> "+ radius
 					return L.circle([gz.poiCenter[0], gz.poiCenter[1]],{radius: radius, color: gzSettings.border.color, weight:gzSettings.border.weight, fillColor: gzSettings.color, fillOpacity: gzSettings.opacity}).bindTooltip(text, {className: 'myTooltip'});
 				}
 			}).filter(el => el);
-			L.featureGroup(geoArr).addTo(layers.geozones);
+			let fg = L.featureGroup(geoArr).addTo(layers.geozones);
+			//bigMap.fitBounds(fg.getBounds());
+
+
+			
 		})
 	}
-
+	
+	$('#msisdn.error').removeClass("error");
 	let msisdn = document.getElementById('msisdn').value
-
-
+	if(!msisdn || msisdn == ""){
+		$('#msisdn').addClass("error");
+		return;
+	}
 	let fromTime = moment(document.getElementById('fromDate').value + ' ' + document.getElementById('fromTime').value+':59', 'DD.MM.YYYY HH:mm:ss').toISOString()
 	let tillTime = moment(document.getElementById('tillDate').value + ' ' + document.getElementById('tillTime').value+':59', 'DD.MM.YYYY HH:mm:ss').toISOString()
 
 
-	layers.clear()
-	$("noData[id$=NoData]:visible").hide();
-	drawGeozones()
-	requestAndDraw(['raw', 'processed', 'live', 'last'])
+	//layers.clear()
+	$("#"+type+">noData:visible").hide();
+
+	if (type == 'geozones'){
+		drawGeozones()
+	}else{
+		requestAndDraw([type])
+	}
+	
+	
 }
 
 let draw = function(markers, type){
@@ -298,7 +294,7 @@ let draw = function(markers, type){
 	
 	if(type == "live"){
 		if(!markers.inputValues[0].value){
-			$("#liveNoData").css("display", "inline-block");
+			$("#live>noData").css("display","inline-block");
 			return;
 		}
 		markers.inputValues = markers.inputValues.map(el => {
@@ -376,7 +372,7 @@ let draw = function(markers, type){
 	var polyline = L.polyline(lineCoords, {color: colors[type].track.color, weight:colors[type].track.weight}).addTo(layers.geometry);
 
 	//check if we're loading tracks and fit to track or to point
-	let check = (!!~["live", 'last'].indexOf(type)) && ($("#rawDataCheck:checked").length || $("#processedDataCheck:checked").length);
+	let check = (!!~["live", 'last'].indexOf(type));
 	if (!check){
 		bigMap.fitBounds(polyline.getBounds());
 	}else{

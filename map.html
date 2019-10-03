@@ -24,7 +24,8 @@
 
 <div id='map'></div><div id='controls'>
 	<table>
-		<caption>Параметры</caption>
+		<caption>Параметр<span id='putIvansNumber'>ы</span>
+		</caption>
 		<tr>
 			<td>Абонент</td>
 			<td><input type='phone' id='msisdn' >
@@ -44,42 +45,37 @@
 			</td>
 		</tr>
 		<tr>
-			<td colspan="2">
-				<dataTypeSelector>
-					<label>
-						<smallLoader id="rawLoader"></smallLoader>
-						<input type='checkbox' id='rawDataCheck' name='dataTypeRaw' />
-						<noData id="rawNoData" title='Нет данных'></noData>
-						<span>Raw data</span>
-					</label>
-					<label>
-						<smallLoader id="processedLoader"></smallLoader>
-						<input type='checkbox' id='processedDataCheck' name='dataTypeProcess' checked='checked'>
-						<noData id="processedNoData" title='Нет данных'></noData>
-						<span>Processed</span>
-					</label>
-					<label>
-						<smallLoader id="liveLoader"></smallLoader>
-						<input type='checkbox' id='liveDataCheck' name='dataTypeLive' />
-						<noData id="liveNoData" title='Нет данных'></noData>
-						<span>Live data</span>
-					</label>
-					<label>
-						<smallLoader id="lastLoader"></smallLoader>
-						<input type='checkbox' id='lastDataCheck' name='dataTypeLast' />
-						<noData id="lastNoData" title='Нет данных'></noData>
-						<span>Last data</span>
-					</label>
-				</dataTypeSelector>	
-			</td>
-		</tr>
-		<tr>
 			<td colspan="2" class='buttons'>
-				<input type='submit' id='submit' value='Запрос'>
-				<input type='button' id='clear' value='Очистить'>
-				
-				
+				<button id='raw'>
+					<smallLoader></smallLoader>
+					<noData title='Нет данных'></noData>
+					<span>Raw</span>
+				</button>
+				<button id='processed' class='test'>
+					<smallLoader></smallLoader>
+					<noData title='Нет данных'></noData>
+					<span>Processed</span>
+				</button>
+				<button id='live'>
+					<smallLoader></smallLoader>
+					<noData title='Нет данных'></noData>
+					<span>Live</span>
+				</button>
+				<button id='last'>
+					<smallLoader></smallLoader>
+					<noData title='Нет данных'></noData>
+					<span>Last</span>
+				</button>
+				<button id='geozones'>
+					<smallLoader></smallLoader>
+					<noData title='Нет данных'></noData>
+					<span>Geozones</span>
+				</button>
 				<button class='csv' title='Загрузить CSV' ><label for='csv'><img src='./img/csv.png' /></label></button>
+				<button id='clear'>Очистить</button>
+				
+				
+				
 				<input type='file' id='csv' accept='.csv' onchange='openCsv(event)'>
 				
 

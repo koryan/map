@@ -26,18 +26,19 @@ table tr.datetime input{width:48%;}
 table tr>td{padding:0px;}
 table tr>td:first-of-type{padding-right:5px;width:20%;}
 table tr:first-of-type input{width:97.5%;}
-table td.buttons>*{display:inline-block;vertical-align: middle;}
-table td.buttons input{font-size:120%;padding: 5px 20px;}
+table td.buttons>*{display:inline-block;vertical-align: middle;margin-bottom: 4px;}
+table td.buttons>*[disabled]{cursor:wait;}
+table td.buttons>*{font-size:120%;padding: 5px 20px;position:relative;}
+table td.buttons>*>noData{cursor:help;display:none;width:16px;height:16px;background-size: contain;background-image: url(./img/cancel.png)}
+table td.buttons>*>smallLoader{position:absolute;top: .5em;left: 1em;display:none;width:16px;height:16px;background-image: url(./img/smallLoader.gif)}
 table td.buttons>#csv{width:0px;padding:0px;}
-table td.buttons button.csv{padding-top:6px;padding-bottom:3px}
-table td.buttons button.csv img{height: 1.8em;}
+table td.buttons button.csv{padding-top:0px;padding-bottom:0px}
+table td.buttons button.csv img{height: 1.4em;position:relative;top:3px;}
 
 div#pointInfo{border:1px dashed gray;position:relative;padding:10px 5px 4px;font-size:90%;}
 div#pointInfo:before{content:"Информация по точке";background-color:white;position:absolute;font-size: 90%;top: -9px;left: 8px;}
 
-dataTypeSelector{display:block;font-size:100%;width:100%;margin-top:10px;margin-bottom:10px;}
-dataTypeSelector label{cursor:pointer;display:inline;margin-right:10px;white-space: nowrap}
-dataTypeSelector label>*{vertical-align: middle;display:inline-block;}
-dataTypeSelector label>input{margin:0px;width:16px;height:16px;}
-dataTypeSelector label>noData{cursor:help;display:none;width:16px;height:16px;background-size: contain;background-image: url(./img/cancel.png)}
-dataTypeSelector label>smallLoader{display:none;width:16px;height:16px;background-image: url(./img/smallLoader.gif)}
+#msisdn.error{border-color:red;}
+
+#putIvansNumber{cursor:default;}
+
