@@ -149,96 +149,175 @@ let drawCsv = function(csvData){
 
 function getData(type){
 	
-	let requestAndDraw = function(type){
-		let doRequest = function(type, cb){
-			let uri = "http://10.72.12.98:80/coords?msisdn="+ msisdn +"&startTime="+ fromTime +"&endTime="+ tillTime +"&type="+ type;
-			fetch(uri).then(function(response){
-	
-				if(response.status !== 200){
-					cb(response.status, response)
-					return;
-				}
-				
-				response.json().then(function(data) {  
-			        console.log(data);  
-
-			        //rename values for live data
-			        if(!data.inputValues && data.inputs && data.inputs.length){data.inputValues = data.inputs;delete data.inputs;}
-					if(!data.inputValues){
-						cb("No data")
-						return
-					}
-					cb(false, data)	
-			    });  
-		    }).catch(function(err) {  
-		    	console.log(err)
-			    cb(err);
-			});
-			
+	let doRequest = function(type, cb){
+		let uri = undefined;
+		switch(type){
+			case "geozones":
+				uri = "http://10.72.12.98/geo?msisdn="+msisdn;
+				break;
+			case 'raw':
+			case 'last':
+			case 'processed':
+			case 'live':
+				uri = "http://10.72.12.98:80/coords?msisdn="+ msisdn +"&startTime="+ fromTime +"&endTime="+ tillTime +"&type="+ type;
+				break;
+			default: 
+				cb("Wrong data type");
+				return;
+				break;
 		}
-
-
 		
-		
-
 		$("#"+ type +">smallLoader").css("display", "block")
 		$("#"+ type +">span").css("visibility", "hidden");
 		$("#"+ type).prop( "disabled", true );
 
-		doRequest(type, function(err, data){
+		fetch(uri).then(function(response){
 			$("#"+ type +">smallLoader").css("display", "none")
 			$("#"+ type +">span").css("visibility", "visible");
 			$("#"+ type).prop( "disabled", false );
-			if(err){
-				if(err == "No data"){
-					$("#"+ type +">noData").show();
+
+			if(response.status !== 200){
+				cb(response.status, response)
+				return;
+			}
+			
+			response.json().then(function(data) {  
+		        console.log(data);  
+
+		        
+				cb(false, data)	
+		    });  
+	    }).catch(function(err) {  
+	    	console.log(err)
+		    cb(err);
+		});
+		
+	}
+
+	let drawPoints = function(type){
+		
+		let draw = function(markers, type){
+			let countRepeats = 1;
+			let usedCoords = {};
+			let index = 0;
+			let lineCoords = [];
+
+			let colors = pointsColorsSettings;  //from colors.json
+			
+			if(type == "live"){
+				if(!markers.inputValues[0].value){
+					$("#live>noData").css("display","inline-block");
+					return;
+				}
+				markers.inputValues = markers.inputValues.map(el => {
+					el.v = el.value;
+					el.i = el.input;
+					delete el.value;
+					delete el.input;
+					return el;
+				})
+
+				markers.inputValues = [{inputs: markers.inputValues}]
+			}
+
+			for ( let i in markers.inputValues)
+			{
+				let currentMarker =  markers.inputValues[i];
+
+				let coords = [currentMarker.inputs[0].v.latitude, currentMarker.inputs[0].v.longitude];
+				let radius = currentMarker.inputs[0].v.radius
+				let currentTime = moment(currentMarker.inputs[1].v).format("HH:mm:ss DD.MM")
+				
+				
+				lineCoords.push(coords);
+				index ++;
+
+				if(!usedCoords[""+coords]){
+					usedCoords[""+coords] = [[currentTime, i]];
 				}else{
+					usedCoords[""+coords].push([currentTime, i]);
+				}
+
+
+				
+
+				let text = "<b>Радиус:</b> "+radius+"<br>"
+				let pointsListText = ""
+
+				text+="<b>Был там:</b> "+usedCoords[""+coords].length + "<br>"
+				pointsListText+=usedCoords[""+coords].map(el => "<i>"+ el[1] +"</i>) "+ el[0]).join("<br />")+""
+				if (usedCoords[""+coords].length <= maxPointLengthInTooltip){
+					text += pointsListText;
+				}else{
+					text += "Click it!"
+				}
+
+				
+				if(type == "raw"){
+					let posMethod = currentMarker.inputs[0].v.pos_method;
+					colors[type].point.border.color = colors[type].point.borders[posMethod];
+					colors[type].point.background = colors[type].point.backgrounds[posMethod];
+				}
+
+				var circle  = L.circle(      coords,{radius: radius, weight: colors[type].circle.border.weight, color: colors[type].circle.border.color, fillColor: colors[type].circle.background, fillOpacity: .05});
+				let cCenter = L.circleMarker(coords,{text:pointsListText, radius: 10,     weight: colors[type].point.border.weight,  color: colors[type].point.border.color, fillColor: colors[type].point.background});
+
+
+				if (usedCoords[""+coords].length > maxPointLengthInTooltip)
+
+				cCenter.bindTooltip(text, {className: 'myTooltip'})
+				circle.bindTooltip(text, {className: 'myTooltip'})
+				circle.addTo(layers.markersLayer).on('click', function(e){
+					$("div#pointInfo").html(e.target.options.text)
+					console.log("11",e)
+				})
+				cCenter.addTo(layers.pointsLayer).on('click', function(e){
+					$("div#pointInfo").html(e.target.options.text)
+					console.log("11",e)
+				})
+				
+					
+				
+				countRepeats = 1;
+				prev = ""+coords;
+			}
+			var polyline = L.polyline(lineCoords, {color: colors[type].track.color, weight:colors[type].track.weight}).addTo(layers.geometry);
+
+			//check if we're loading tracks and fit to track or to point
+			let check = (!!~["live", 'last'].indexOf(type));
+			if (!check){
+				bigMap.fitBounds(polyline.getBounds());
+			}else{
+				bigMap.fitBounds(circle.getBounds());
+			}
+		}
+
+		doRequest(type, function(err, data){
+			if(err){
 					console.log(err, data)
 					alert("Ошибка загрузки данных")	
-				}
 				return;
+			}
+			
+			//rename values for live data
+			if(type == "live" && !data.inputValues && data.inputs && data.inputs.length){data.inputValues = data.inputs;delete data.inputs;}
+			if(!data.inputValues){
+				cb("No data")
+				return
 			}
 			draw(data, type)
 		})
-		
 			
 	}
 
 	let drawGeozones = function(){
 		let magicEmpiricalNumber = 62661.2321733;
-		let doRequest = function(cb){
-
-			let uri = "http://10.72.12.98/geo?msisdn="+msisdn;//"geozones.json";
-			let request = new XMLHttpRequest();
-			request.open('GET', uri);
-			request.send();
-
-			request.onreadystatechange = function () {		
-			    if (request.readyState === 4) {
-					try{
-						let ans = JSON.parse(request.responseText)				      
-				    	cb(false, ans)	
-				    	return;
-				    }catch(err){
-				    	cb(err)
-				    	return
-				    }
-				    cb("Can't get geozones");
-				    return;
-				}
-			}
-		}
 		let geoArr = [];
 		let gzSettings = geozonesSettings; //from colors.json
 
 
-		$("#geozones>smallLoader").css("display", "block")
-		$("#geozones>span").css("visibility", "hidden");
-		$("#geozones").prop( "disabled", true );
-		doRequest(function(err, data){
-			$("#geozones>smallLoader").css("display", "none")
-			$("#geozones>span").css("visibility", "visible");
-			$("#geozones").prop( "disabled", false );
+		
+		doRequest("geozones", function(err, data){		
 			if(err){
 				alert("Ошибка загрузки геозон")
 				console.log(err);
@@ -261,6 +340,10 @@ function getData(type){
 			
 		})
 	}
+
+	let drawTowers = function(){
+
+	}
 	
 	$('#msisdn.error').removeClass("error");
 	let msisdn = document.getElementById('msisdn').value
@@ -277,108 +360,16 @@ function getData(type){
 
 	if (type == 'geozones'){
 		drawGeozones()
+	}else if(type == 'cellTowers'){
+		drawTowers()
 	}else{
-		requestAndDraw([type])
+		drawPoints(type)
 	}
 	
 	
 }
 
-let draw = function(markers, type){
-	let countRepeats = 1;
-	let usedCoords = {};
-	let index = 0;
-	let lineCoords = [];
 
-	let colors = pointsColorsSettings;  //from colors.json
-	
-	if(type == "live"){
-		if(!markers.inputValues[0].value){
-			$("#live>noData").css("display","inline-block");
-			return;
-		}
-		markers.inputValues = markers.inputValues.map(el => {
-			el.v = el.value;
-			el.i = el.input;
-			delete el.value;
-			delete el.input;
-			return el;
-		})
-
-		markers.inputValues = [{inputs: markers.inputValues}]
-	}
-
-	for ( let i in markers.inputValues)
-	{
-		let currentMarker =  markers.inputValues[i];
-
-		let coords = [currentMarker.inputs[0].v.latitude, currentMarker.inputs[0].v.longitude];
-		let radius = currentMarker.inputs[0].v.radius
-		let currentTime = moment(currentMarker.inputs[1].v).format("HH:mm:ss DD.MM")
-		
-		
-		lineCoords.push(coords);
-		index ++;
-
-		if(!usedCoords[""+coords]){
-			usedCoords[""+coords] = [[currentTime, i]];
-		}else{
-			usedCoords[""+coords].push([currentTime, i]);
-		}
-
-
-		
-
-		let text = "<b>Радиус:</b> "+radius+"<br>"
-		let pointsListText = ""
-
-		text+="<b>Был там:</b> "+usedCoords[""+coords].length + "<br>"
-		pointsListText+=usedCoords[""+coords].map(el => "<i>"+ el[1] +"</i>) "+ el[0]).join("<br />")+""
-		if (usedCoords[""+coords].length <= maxPointLengthInTooltip){
-			text += pointsListText;
-		}else{
-			text += "Click it!"
-		}
-
-		
-		if(type == "raw"){
-			let posMethod = currentMarker.inputs[0].v.pos_method;
-			colors[type].point.border.color = colors[type].point.borders[posMethod];
-			colors[type].point.background = colors[type].point.backgrounds[posMethod];
-		}
-
-		var circle  = L.circle(      coords,{radius: radius, weight: colors[type].circle.border.weight, color: colors[type].circle.border.color, fillColor: colors[type].circle.background, fillOpacity: .05});
-		let cCenter = L.circleMarker(coords,{text:pointsListText, radius: 10,     weight: colors[type].point.border.weight,  color: colors[type].point.border.color, fillColor: colors[type].point.background});
-
-
-		if (usedCoords[""+coords].length > maxPointLengthInTooltip)
-
-		cCenter.bindTooltip(text, {className: 'myTooltip'})
-		circle.bindTooltip(text, {className: 'myTooltip'})
-		circle.addTo(layers.markersLayer).on('click', function(e){
-			$("div#pointInfo").html(e.target.options.text)
-			console.log("11",e)
-		})
-		cCenter.addTo(layers.pointsLayer).on('click', function(e){
-			$("div#pointInfo").html(e.target.options.text)
-			console.log("11",e)
-		})
-		
-			
-		
-		countRepeats = 1;
-		prev = ""+coords;
-	}
-	var polyline = L.polyline(lineCoords, {color: colors[type].track.color, weight:colors[type].track.weight}).addTo(layers.geometry);
-
-	//check if we're loading tracks and fit to track or to point
-	let check = (!!~["live", 'last'].indexOf(type));
-	if (!check){
-		bigMap.fitBounds(polyline.getBounds());
-	}else{
-		bigMap.fitBounds(circle.getBounds());
-	}
-}
 
 var mapInit = function(){
 	var mbUrl = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
