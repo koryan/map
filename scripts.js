@@ -9,19 +9,17 @@ var layers = {
 	geometry: L.layerGroup(),
 	geozones: L.layerGroup(),
 	cells: L.layerGroup(),
+	cellsZones: L.layerGroup(),
 	clear: function(){
-		this.markersLayer.clearLayers();
-		this.pointsLayer.clearLayers();
-		this.geometry.clearLayers();
-		this.geozones.clearLayers();
-		this.cells.clearLayers();
+		for(var i in this){
+			if(i != "clear")this[i].clearLayers();
+		}
 		$("div.pointInfo").html("<i>Click on point to get it data</i>")
 	}
 }
 
 var bigMap = undefined;
 let maxPointLengthInTooltip = 10;
-let prev = undefined;	
 
 
 //init date & time
@@ -96,7 +94,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
 let drawCsv = function(csvData){
-	layers.clear()
+	layers.geometry.clear()
 	let csvToJson = function(csv){
 			let answer = [];
 			let objKeys = [];
@@ -156,7 +154,6 @@ function getData(type){
 		let uri = undefined;
 		let params = {};
 		let genParamsString = function(params){
-			console.log(params			)
 			return Object.keys(params).map(el => {
 				return el.trim()+"="+params[el].toString().trim()
 			}).join("&")
@@ -381,26 +378,29 @@ function getData(type){
 		}
 
 		let towersArr = [];
+		let radiusesArr = [];
+		let createText = function(obj){
+			
+			return Object.keys(obj).map((i) => "<b>"+i+":</b> "+obj[i]).join("<br>");
+		}
 		doRequest("cellTowers", function(err, data){		
 			if(err){
-				alert("Ошибка загрузки геозон")
+				alert("Ошибка загрузки вышек")
 				console.log(err);
 				return;
 			}
 			let cellSettings = towerCellsSettings; //from colors.json
 
-			radiusesArr = data.map(cell => {
-				let text = "<b>id: </b>"+ cell.id +"<br /><b>radius: </b>"+ cell.max_radius;				
-				return L.circle([cell.lat, cell.lon],{radius: cell.max_radius, color: cellSettings.circle.border.color, weight:cellSettings.circle.border.weight, fillColor: cellSettings.circle.background, fillOpacity: cellSettings.circle.opacity}).bindTooltip(text, {className: 'myTooltip'});
-			})
-			towersArr = data.map(cell => {
-				let text = "<b>id: </b>"+ cell.id +"<br /><b>radius: </b>"+ cell.max_radius;				
-				return L.circleMarker([cell.lat, cell.lon],{text:text, radius: cellSettings.point.radius,     weight: cellSettings.point.border.weight,  color: cellSettings.point.border.color, fillColor: cellSettings.point.background, fillOpacity: cellSettings.point.opacity}).bindTooltip(text, {className: 'myTooltip'});
-
-			})
-			
-			L.featureGroup(radiusesArr).addTo(layers.cells);
+			for(i in data){
+				let cell = data[i];
+				let text = createText({id:cell.id,radius: cell.max_radius, lac: cell.lac})
+				console.log(text)
+				radiusesArr.push(L.circle([cell.lat, cell.lon],{radius: cell.max_radius, color: cellSettings.circle.border.color, weight:cellSettings.circle.border.weight, fillColor: cellSettings.circle.background, fillOpacity: cellSettings.circle.opacity}).bindTooltip(text, {className: 'myTooltip'}))
+				towersArr.push(L.circleMarker([cell.lat, cell.lon],{text:text, radius: cellSettings.point.radius,     weight: cellSettings.point.border.weight,  color: cellSettings.point.border.color, fillColor: cellSettings.point.background, fillOpacity: cellSettings.point.opacity}).bindTooltip(text, {className: 'myTooltip'}))
+			}
+			L.featureGroup(radiusesArr).addTo(layers.cellsZones);
 			L.featureGroup(towersArr).addTo(layers.cells);
+			
 		})
 	}
 
@@ -446,7 +446,7 @@ var mapInit = function(){
 	bigMap = L.map('map', {
 		center: [55.751244, 37.618423],
 		zoom: 12,
-		layers: [grayscale, layers.cities, layers.geometry, layers.markersLayer, layers.pointsLayer, layers.geozones, layers.cells]
+		layers: [grayscale, layers.cities, layers.geometry, layers.markersLayer, layers.pointsLayer, layers.geozones, layers.cellsZones, layers.cells]
 	});
 
 	var baseLayers = {
@@ -459,7 +459,8 @@ var mapInit = function(){
 		"Радиусы": layers.markersLayer,
 		"Точки": layers.pointsLayer,
 		"Геозоны": layers.geozones,
-		"Вышки": layers.cells
+		"Вышки": layers.cells,
+		"Вышки c зоной": layers.cellsZones
 	};
 
 	L.control.layers(baseLayers, overlays).addTo(bigMap);
