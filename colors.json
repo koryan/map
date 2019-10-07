@@ -110,3 +110,23 @@ var geozonesSettings = {
 		"weight": 1
 	}
 }
+
+var towerCellsSettings = {
+	"circle":{
+		"border":{
+			"color":"black",
+			"weight": 1
+		},
+		"background": "orange",
+		"opacity": 0.1
+	},
+	"point":{
+		"radius": 5,
+		"border":{
+			"color":"red",
+			"weight": 1
+		},
+		"background": "green",
+		"opacity": 0.5
+	},
+}

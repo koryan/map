@@ -1,5 +1,6 @@
 
 let defaultMsisdn = "+79152103911"
+let maxMapSizeForCellTowers = .5;// in degrees
 
 var layers = {
 	markersLayer: L.layerGroup(),
@@ -7,11 +8,13 @@ var layers = {
 	cities: L.layerGroup(),
 	geometry: L.layerGroup(),
 	geozones: L.layerGroup(),
+	cells: L.layerGroup(),
 	clear: function(){
 		this.markersLayer.clearLayers();
 		this.pointsLayer.clearLayers();
 		this.geometry.clearLayers();
 		this.geozones.clearLayers();
+		this.cells.clearLayers();
 		$("div.pointInfo").html("<i>Click on point to get it data</i>")
 	}
 }
@@ -68,15 +71,15 @@ document.addEventListener("DOMContentLoaded", function() {
 		$("#msisdn").val(defaultMsisdn);
 	})
 
-	$("#clear").click(function(){
-		layers.clear()
-	})
+	// $("#clear").click(function(){
+	// 	layers.clear()
+	// })
 
 
 
 	$('.buttons>*').click(function(e){
 		let type = e.currentTarget.id
-		if(!!~['raw','processed', 'live', 'last', 'geozones'].indexOf(type)){
+		if(!!~['raw','processed', 'live', 'last', 'geozones', 'cellTowers'].indexOf(type)){
 			getData(type)
 		}else if(!!~['cvs','clear'].indexOf(type)){
 			layers.clear()
@@ -151,6 +154,13 @@ function getData(type){
 	
 	let doRequest = function(type, cb){
 		let uri = undefined;
+		let params = {};
+		let genParamsString = function(params){
+			console.log(params			)
+			return Object.keys(params).map(el => {
+				return el.trim()+"="+params[el].toString().trim()
+			}).join("&")
+		}
 		switch(type){
 			case "geozones":
 				uri = "http://10.72.12.98/geo?msisdn="+msisdn;
@@ -158,8 +168,31 @@ function getData(type){
 			case 'raw':
 			case 'last':
 			case 'processed':
+				params = {
+					msisdn: msisdn,
+					type: type,
+					startTime: fromTime,
+					endTime: tillTime
+				}
+				
+				
+				uri = "http://10.72.12.98:80/coords?"+genParamsString(params);
+				break;
 			case 'live':
-				uri = "http://10.72.12.98:80/coords?msisdn="+ msisdn +"&startTime="+ fromTime +"&endTime="+ tillTime +"&type="+ type;
+				params = {
+					msisdn: msisdn,
+					type: type
+				}
+				uri = "http://10.72.12.98:80/coords?"+ genParamsString(params);
+				break;
+			case 'cellTowers':
+				params = {
+					latb: bigMap.getBounds().getNorthWest().lat,
+					lonb: bigMap.getBounds().getNorthWest().lng,
+					lata: bigMap.getBounds().getSouthEast().lat,
+					lona: bigMap.getBounds().getSouthEast().lng
+				}
+				uri = "http://10.72.12.98:80/cells?"+genParamsString(params);
 				break;
 			default: 
 				cb("Wrong data type");
@@ -170,8 +203,8 @@ function getData(type){
 		$("#"+ type +">smallLoader").css("display", "block")
 		$("#"+ type +">span").css("visibility", "hidden");
 		$("#"+ type).prop( "disabled", true );
-
 		fetch(uri).then(function(response){
+
 			$("#"+ type +">smallLoader").css("display", "none")
 			$("#"+ type +">span").css("visibility", "visible");
 			$("#"+ type).prop( "disabled", false );
@@ -182,7 +215,7 @@ function getData(type){
 			}
 			
 			response.json().then(function(data) {  
-		        console.log(data);  
+		        //console.log(data);  
 
 		        
 				cb(false, data)	
@@ -298,16 +331,15 @@ function getData(type){
 					alert("Ошибка загрузки данных")	
 				return;
 			}
-			
+
 			//rename values for live data
 			if(type == "live" && !data.inputValues && data.inputs && data.inputs.length){data.inputValues = data.inputs;delete data.inputs;}
 			if(!data.inputValues){
-				cb("No data")
+				$("#"+ type +">noData").css("display","inline-block");
 				return
 			}
 			draw(data, type)
 		})
-			
 	}
 
 	let drawGeozones = function(){
@@ -342,27 +374,60 @@ function getData(type){
 	}
 
 	let drawTowers = function(){
+		if(bigMap.getBounds().getNorth() - bigMap.getBounds().getSouth() > maxMapSizeForCellTowers && 
+			bigMap.getBounds().getEast() - bigMap.getBounds().getWest() > maxMapSizeForCellTowers){
+			alert("Слишком большой масштаб карты");
+			return;
+		}
 
+		let towersArr = [];
+		doRequest("cellTowers", function(err, data){		
+			if(err){
+				alert("Ошибка загрузки геозон")
+				console.log(err);
+				return;
+			}
+			let cellSettings = towerCellsSettings; //from colors.json
+
+			radiusesArr = data.map(cell => {
+				let text = "<b>id: </b>"+ cell.id +"<br /><b>radius: </b>"+ cell.max_radius;				
+				return L.circle([cell.lat, cell.lon],{radius: cell.max_radius, color: cellSettings.circle.border.color, weight:cellSettings.circle.border.weight, fillColor: cellSettings.circle.background, fillOpacity: cellSettings.circle.opacity}).bindTooltip(text, {className: 'myTooltip'});
+			})
+			towersArr = data.map(cell => {
+				let text = "<b>id: </b>"+ cell.id +"<br /><b>radius: </b>"+ cell.max_radius;				
+				return L.circleMarker([cell.lat, cell.lon],{text:text, radius: cellSettings.point.radius,     weight: cellSettings.point.border.weight,  color: cellSettings.point.border.color, fillColor: cellSettings.point.background, fillOpacity: cellSettings.point.opacity}).bindTooltip(text, {className: 'myTooltip'});
+
+			})
+			
+			L.featureGroup(radiusesArr).addTo(layers.cells);
+			L.featureGroup(towersArr).addTo(layers.cells);
+		})
 	}
+
+	$("#"+type+">noData:visible").hide();
 	
 	$('#msisdn.error').removeClass("error");
 	let msisdn = document.getElementById('msisdn').value
+	
 	if(!msisdn || msisdn == ""){
 		$('#msisdn').addClass("error");
 		return;
 	}
-	let fromTime = moment(document.getElementById('fromDate').value + ' ' + document.getElementById('fromTime').value+':59', 'DD.MM.YYYY HH:mm:ss').toISOString()
-	let tillTime = moment(document.getElementById('tillDate').value + ' ' + document.getElementById('tillTime').value+':59', 'DD.MM.YYYY HH:mm:ss').toISOString()
-
-
-	//layers.clear()
-	$("#"+type+">noData:visible").hide();
+	
+	
+	console.log("type", type)
 
 	if (type == 'geozones'){
 		drawGeozones()
 	}else if(type == 'cellTowers'){
+		
+
 		drawTowers()
 	}else{
+
+		var fromTime = moment(document.getElementById('fromDate').value + ' ' + document.getElementById('fromTime').value+':59', 'DD.MM.YYYY HH:mm:ss').toISOString()
+		var tillTime = moment(document.getElementById('tillDate').value + ' ' + document.getElementById('tillTime').value+':59', 'DD.MM.YYYY HH:mm:ss').toISOString()
+
 		drawPoints(type)
 	}
 	
@@ -381,7 +446,7 @@ var mapInit = function(){
 	bigMap = L.map('map', {
 		center: [55.751244, 37.618423],
 		zoom: 12,
-		layers: [grayscale, layers.cities, layers.geometry, layers.markersLayer, layers.pointsLayer, layers.geozones]
+		layers: [grayscale, layers.cities, layers.geometry, layers.markersLayer, layers.pointsLayer, layers.geozones, layers.cells]
 	});
 
 	var baseLayers = {
@@ -393,7 +458,8 @@ var mapInit = function(){
 		"Трек": layers.geometry,
 		"Радиусы": layers.markersLayer,
 		"Точки": layers.pointsLayer,
-		"Геозоны": layers.geozones
+		"Геозоны": layers.geozones,
+		"Вышки": layers.cells
 	};
 
 	L.control.layers(baseLayers, overlays).addTo(bigMap);
