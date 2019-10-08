@@ -1,12 +1,12 @@
 
 let defaultMsisdn = "+79152103911"
-let maxMapSizeForCellTowers = .5;// in degrees
+
 
 var layers = {
 	markersLayer: L.layerGroup(),
 	pointsLayer: L.layerGroup(),
 	cities: L.layerGroup(),
-	geometry: L.layerGroup(),
+	csv: L.layerGroup(),
 	geozones: L.layerGroup(),
 	cells: L.layerGroup(),
 	cellsZones: L.layerGroup(),
@@ -19,7 +19,17 @@ var layers = {
 }
 
 var bigMap = undefined;
-let maxPointLengthInTooltip = 10;
+var globalSettings = undefined;
+
+//get settings
+$.get("settings.json", function(data){
+	try{
+		globalSettings = JSON.parse(data)
+	}catch(err){
+		console.log(err)
+		$("body").html("<h1 id='settingsLoadError'>Парус!! Порвали парус!<br /><span>Проверь settings.json</span><pre>"+err+"</pre></h1>")
+	}
+})
 
 
 //init date & time
@@ -79,7 +89,7 @@ document.addEventListener("DOMContentLoaded", function() {
 		let type = e.currentTarget.id
 		if(!!~['raw','processed', 'live', 'last', 'geozones', 'cellTowers'].indexOf(type)){
 			getData(type)
-		}else if(!!~['cvs','clear'].indexOf(type)){
+		}else if(!!~['csv','clear'].indexOf(type)){
 			layers.clear()
 		}
 	})
@@ -94,7 +104,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
 let drawCsv = function(csvData){
-	layers.geometry.clear()
+	console.log(layers)
+	//layers.csv.clear()
 	let csvToJson = function(csv){
 			let answer = [];
 			let objKeys = [];
@@ -129,7 +140,7 @@ let drawCsv = function(csvData){
 	})
 
 	
-	let csvColors = csvSettings; //from colors.json
+	let csvColors = globalSettings.colors.csv; //from colors.json
 	let trackCoords = [];
 	let circlesArr = [];
 	for(let i in data){
@@ -142,7 +153,7 @@ let drawCsv = function(csvData){
 		
 	}
 	var featureGroup = L.featureGroup(circlesArr).addTo(layers.markersLayer);
-	L.polyline(trackCoords, {color: csvColors.track.color, weight:csvColors.track.weight}).addTo(layers.geometry);
+	L.polyline(trackCoords, {color: csvColors.track.color, weight:csvColors.track.weight}).addTo(layers.csv);
 	
 	bigMap.fitBounds(featureGroup.getBounds());
 	
@@ -232,7 +243,7 @@ function getData(type){
 			let index = 0;
 			let lineCoords = [];
 
-			let colors = pointsColorsSettings;  //from colors.json
+			let colors = globalSettings.colors.points;  //from colors.json
 			
 			if(type == "live"){
 				if(!markers.inputValues[0].value){
@@ -276,7 +287,7 @@ function getData(type){
 
 				text+="<b>Был там:</b> "+usedCoords[""+coords].length + "<br>"
 				pointsListText+=usedCoords[""+coords].map(el => "<i>"+ el[1] +"</i>) "+ el[0]).join("<br />")+""
-				if (usedCoords[""+coords].length <= maxPointLengthInTooltip){
+				if (usedCoords[""+coords].length <= globalSettings.maxPointLengthInTooltip){
 					text += pointsListText;
 				}else{
 					text += "Click it!"
@@ -293,7 +304,7 @@ function getData(type){
 				let cCenter = L.circleMarker(coords,{text:pointsListText, radius: 10,     weight: colors[type].point.border.weight,  color: colors[type].point.border.color, fillColor: colors[type].point.background});
 
 
-				if (usedCoords[""+coords].length > maxPointLengthInTooltip)
+				if (usedCoords[""+coords].length > globalSettings.maxPointLengthInTooltip)
 
 				cCenter.bindTooltip(text, {className: 'myTooltip'})
 				circle.bindTooltip(text, {className: 'myTooltip'})
@@ -311,7 +322,7 @@ function getData(type){
 				countRepeats = 1;
 				prev = ""+coords;
 			}
-			var polyline = L.polyline(lineCoords, {color: colors[type].track.color, weight:colors[type].track.weight}).addTo(layers.geometry);
+			var polyline = L.polyline(lineCoords, {color: colors[type].track.color, weight:colors[type].track.weight}).addTo(layers.csv);
 
 			//check if we're loading tracks and fit to track or to point
 			let check = (!!~["live", 'last'].indexOf(type));
@@ -342,8 +353,8 @@ function getData(type){
 	let drawGeozones = function(){
 		let magicEmpiricalNumber = 62661.2321733;
 		let geoArr = [];
-		let gzSettings = geozonesSettings; //from colors.json
-
+		let gzSettings = globalSettings.colors.geozones
+		console.log("gzSettings", gzSettings)
 
 		
 		doRequest("geozones", function(err, data){		
@@ -354,12 +365,13 @@ function getData(type){
 			}
 			geoArr = data.map(gz => {
 				let text = "<b>Название: </b>"+gz.name
+				let bgColor = (gz.attrs && gz.attrs.color)? gz.attrs.color: gzSettings.defaultColor;
 				if(gz.poiArea.length){
-					return L.polygon(gz.poiArea, {color: gzSettings.border.color, weight:gzSettings.border.weight, fillColor: gzSettings.color, fillOpacity: gzSettings.opacity}).bindTooltip(text, {className: 'myTooltip'});
+					return L.polygon(gz.poiArea, {color: gzSettings.border.color, weight:gzSettings.border.weight, fillColor: bgColor, fillOpacity: gzSettings.opacity}).bindTooltip(text, {className: 'myTooltip'});
 				}else{ //cirle
 					let radius =  Math.round(gz.poiCenter[2]*magicEmpiricalNumber)
 					text += "<br><b>Радиус:</b> "+ radius
-					return L.circle([gz.poiCenter[0], gz.poiCenter[1]],{radius: radius, color: gzSettings.border.color, weight:gzSettings.border.weight, fillColor: gzSettings.color, fillOpacity: gzSettings.opacity}).bindTooltip(text, {className: 'myTooltip'});
+					return L.circle([gz.poiCenter[0], gz.poiCenter[1]],{radius: radius, color: gzSettings.border.color, weight:gzSettings.border.weight, fillColor: bgColor, fillOpacity: gzSettings.opacity}).bindTooltip(text, {className: 'myTooltip'});
 				}
 			}).filter(el => el);
 			let fg = L.featureGroup(geoArr).addTo(layers.geozones);
@@ -371,8 +383,8 @@ function getData(type){
 	}
 
 	let drawTowers = function(){
-		if(bigMap.getBounds().getNorth() - bigMap.getBounds().getSouth() > maxMapSizeForCellTowers && 
-			bigMap.getBounds().getEast() - bigMap.getBounds().getWest() > maxMapSizeForCellTowers){
+		if(bigMap.getBounds().getNorth() - bigMap.getBounds().getSouth() > globalSettings.maxMapSizeForCellTowers && 
+			bigMap.getBounds().getEast() - bigMap.getBounds().getWest() > globalSettings.maxMapSizeForCellTowers){
 			alert("Слишком большой масштаб карты");
 			return;
 		}
@@ -446,7 +458,7 @@ var mapInit = function(){
 	bigMap = L.map('map', {
 		center: [55.751244, 37.618423],
 		zoom: 12,
-		layers: [grayscale, layers.cities, layers.geometry, layers.markersLayer, layers.pointsLayer, layers.geozones, layers.cellsZones, layers.cells]
+		layers: [grayscale, layers.cities, layers.csv, layers.markersLayer, layers.pointsLayer, layers.geozones, layers.cellsZones, layers.cells]
 	});
 
 	var baseLayers = {
@@ -455,7 +467,7 @@ var mapInit = function(){
 	};
 
 	var overlays = {
-		"Трек": layers.geometry,
+		"Трек": layers.csv,
 		"Радиусы": layers.markersLayer,
 		"Точки": layers.pointsLayer,
 		"Геозоны": layers.geozones,

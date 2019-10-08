@@ -1,30 +1,36 @@
-var pointsColorsSettings = {
+{
+"maxPointLengthInTooltip": 10,
+"maxMapSizeForCellTowers": 0.15,
+"colors":{
+	"points":{
 		"raw": {
 			"circle":{
 				"border":{
 					"color":"black",
 					"weight": 1
 				},
-				"background": "orange"
+				"background": "orange",
+				"opacity": 0.5
 			},
 			"point":{
 				"border": {
 					"color": null,
 					"weight": 1
 				},
-				"borders": {	//only for raw data (posMethod)
+				"opacity": 0.8,
+				"borders": {	
 					"0": "red",
 					"8192": "orange",
 					"4096": "yellow",
 					"2": "blue"
 				},
 				"background": null,
-				"backgrounds": {	//only for raw data (posMethod)
+				"backgrounds": {	
 					"0": "red",
 					"8192": "orange",
 					"4096": "yellow",
 					"2": "navy"
-				},
+				}
 			},
 			"track": {
 				"color":"blue",
@@ -37,19 +43,21 @@ var pointsColorsSettings = {
 					"color":"red",
 					"weight": 1
 				},
-				"background": "red"
+				"background": "red",
+				"opacity": 0.3
 			},
 			"point":{
 				"border":{
 					"color":"red",
 					"weight": 1
 				},
-				"background": "red"
+				"background": "red",
+				"opacity": 0.4
 			},
 			"track": {
 				"color":"red",
 				"weight":3
-			},
+			}
 		},
 		"last": {
 			"circle":{
@@ -57,7 +65,8 @@ var pointsColorsSettings = {
 					"color":"red",
 					"weight": 4
 				},
-				"background": "orange"
+				"background": "orange",
+				"opacity": 0.2
 			},
 			"point":{
 				"border":{
@@ -65,11 +74,26 @@ var pointsColorsSettings = {
 					"weight": 1
 				},
 				"background": "blue"
+			}
+		},
+		"towerCells": {
+			"circle":{
+				"border":{
+					"color":"black",
+					"weight": 1
+				},
+				"background": "orange",
+				"opacity": 0.1
 			},
-			"track": {
-				"color":"red",
-				"weight":1
-			},
+			"point":{
+				"radius": 5,
+				"border":{
+					"color":"red",
+					"weight": 1
+				},
+				"background": "green",
+				"opacity": 0.5
+			}
 		},
 		"live":{
 			"circle":{
@@ -89,44 +113,25 @@ var pointsColorsSettings = {
 			"track": {
 				"color":"red",
 				"weight":1
-			},
+			}
 		}
-	}
-
-var csvSettings = {
-	"defaultColor": "red",
-	"opacity": 0.7,
-	"track": {
-		"weight":3,
-		"color": "green" 
-	}
-}
-
-var geozonesSettings = {
-	"color": "red",
-	"opacity": 0.2,
-	"border": {
-		"color":"green",
-		"weight": 1
-	}
-}
-
-var towerCellsSettings = {
-	"circle":{
-		"border":{
-			"color":"black",
-			"weight": 1
-		},
-		"background": "orange",
-		"opacity": 0.1
 	},
-	"point":{
-		"radius": 5,
-		"border":{
-			"color":"red",
-			"weight": 1
-		},
-		"background": "green",
-		"opacity": 0.5
+
+	"csv": {
+		"defaultColor": "red",
+		"opacity": 0.7,
+		"track": {
+			"weight":3,
+			"color": "green" 
+		}
 	},
-}
+
+	"geozones": {
+		"color": "red",
+		"opacity": 0.2,
+		"border": {
+			"color":"green",
+			"weight": 1
+		}
+	}	
+}}
