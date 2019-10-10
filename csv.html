@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Ясделие cvsVisualizer</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js" integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og==" crossorigin=""></script>
+    <style>
+    	html, body {
+			height: 100%;
+			margin: 0;
+			font-family: Arial;
+			font-size: 18px
+		}
+		body{
+			position:relative;
+		}
+
+		#map {
+			height: 100%;
+			width:100%;
+		}
+		buttons{position:absolute;right:10px;top:10px;z-index:1000;}
+		buttons>*{background-color: white;cursor:pointer;}
+		#clear icon{
+			margin:10px;
+			display:block;width:32px;height:32px;
+			background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAFbklEQVRYR+2XW3BV1RnHf2utvffZ+5yEJCckhHAOlzbgFat2LHXoxQFfdMRxOiljph28oI50xoGWBhhLxZmK4A2wlvIgPlj7IrYMdeSllxke7NCpxQqogBEwkxCScMzhJCcn+7pWJ3lo6yRogpnhxfW8Zv1/3/fN///tLbjCR1xhfb4CGOtAEASBUkpN9zgGSiN0dA6yIFdFYzbzmecLhUKhqampaQwgjuN4OgHCMOapV07ReT6gWE4wWjCnXrBzww14KXsMZBSgoaGhYdoB/v5uL7vf6MR1Mwz6IMMylokY0h6WSHjs3jzLljRPP0CcaB5/8Ri9hZAh6lBhhTiogAkwTjVSwGDoUOP43HlrmntumzV9HTj9wVmeePUMCJcw9jDS4EcW1V6AtrOMVEJiLYmjCo4McWTCtjW5wtVXzf9yIzBJQrS1HXX6Yz40Nfwq20oo67GcWuKwDNJmKEwxw5UoE1EJYpIkJhN1sb39lsJVi74EQHz0HcSurXT3Fij6EV+r8lC24qf5+ymmvo7RFrHwEEKRxCMEYURKaaqjMzh6kOeeWnl5IzBaEzy9AeeT03QXBjl1vsiR/gI31FaTSztc01jDa9lv8+f65fjJDGyToIWFnRTh4gmkUuzYei+WJaYO4L//b6wXtiA17DtykuYqj1ub69l/sotTxRJzZ2SwbIeljTWI+tlsmv8IwmSwgz7i4QK5RsljP7qO/OLvTc0FY1Vvbcc+8xEDQcLLh49ToxSrFjaTTnsgJeeHhtl/opMm12b57DqqPIeS7bGh+cckic99d8zm8Pt9bP7lGoQQkweIOz5EPL8ZcbHEmye7ODEwxA8W5WmZUQVGo0dGUK4DQoLWGBOiY82gsOmqJLx2y/2sWjGfbXuPs+u51TTNqp9cEBmjibZtQhx7l9ePn6W/EnB9to5luTqkZdEVao4WSswUhiVZDyEVSaVCbNv0hIZypGloa+OAX8PfjpR45smVtLTk/xvHn5uEujyEvm8FIDnU2cvb3f2svTpPyvVQRvN2/0VMyqEm7fLN2gzEETryGRIO54ZDtOeR+9l6Tj+9nd/dvIodzz6CbVnjdsGEUZz4PsHdS5B+gl1XC5ZNUi7zh44eFlV7zM3W4VgWKvZJp10EmkgbzkWSoSCkZvnt4Lj0v/UmucefpPmueybccZfswEDrMkbOfIIrBOmMh+XYmAQ+KFVYUJ1B64Rqz0WaGCxBJUzoDCCybOZt3EjX7t8SY/jGHw9ipbxLLtgJAYLDhyisexQjRmMzwpOGjCVxUy6JlUJLhdIhyk0x6owLIzF9fkTmuuvJLF3Kub2vMOvBh5m7es0XbvZxAFII5Xccp/iTh9B+QGI0fhCTMjF1tsBzRzPeQSmDLwTdkWAkTsivW0vv/gMM9/Rw0/6DONmZXyg+4TruW7taVbW2YeXm4O98ltI7/yJKBEaCTCJmWgbLSVGWit5EksrlaGht5ezOF6ldcTcLN20Z8/dkz7gO9H7/RuVjUb2yjao77yD55z/4dM8etJAkUYIblvEth0GpmPPgAxSPvMfg0WMs3neAdH7eZHUntmEUx/HZ796sBAJjwFm4kJlPbEGUivS1/xxTGSYKI8LZzTQ//BAdz+8i860lLH7hJZhC1f9POa4DF//ylhrYshltDNK2EUrR9NJvkCmX4T2/JmlpodzdS/+hQ1y791VqF9805ao/F2D0m7D414Nc2Lge6boQRWhlUb9uPTJby8fbn0E1zuLG3+9Dqs+GyuWQXDIHgk8v0HnXckwQYoAITcnymNe+ifwP2y5Ha2pBNHrbGEPP7h0MHPwT3nduY0H7L1BOatrEx9kQrtgfkpm8cae1/v899hXAfwA73tM/XMmC8wAAAABJRU5ErkJggg==")
+		}
+		#realInput{width:0px;}
+		
+		#upload icon{
+			margin:10px;
+			display:block;width:32px;height:32px;
+			background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAA3NCSVQICAjb4U/gAAAACXBIWXMAAAFkAAABZAHfJJTIAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAAY9QTFRF////VVVVQEBAMz1HMz5IMz5JND9JND5JMz9IMz9IMz5IUFliUltjP0lTQkxVAHk0FYNEGF09Gls+HIZJKIxTLo9YL0RHMERHMkFIMz5IND9JN0JMOENMOJNfOkVOPkhSQUtVQkxVRE5XRk9YR5prSFJaSJtsSVNcS1VdS5xuTp5wVF1lVaF2Vl9nVqF2V2BoWqN6XKR7XqV8YWlwaHB3aquFbHN6bayIbnZ8bq2JcXl/dHuBdXyCdnyDdn2DeLGQebKReoGHfoSKgLWXgraYg7eZh7iciI2TiI6TipCUi5GWjJGWjpOYjryij7yik5idl5ygmcGqnKCknMKsn8SvoaWpoqaqo6erpKispMaypqmtpqqup6uuqKuvqMi2qci2q8m4r7K1scy9srW4trm8uLu9uby+u9HEvdLGvtLHv8HEwNPIwcPFwtTKx9fOyMnLydfPyszNzM7PzNnRz9rTz9rU0NvV0dPT0tPU09zX1dbX2dra2trb2tvb29zc3N3d3ODe3t7e4OLh4+Pj5OTkVE+b2gAAAA90Uk5TAAMEaIOkp6ipqrD8/P7+2NvghAAAAURJREFUOI1jYGBgYJbEBKxMDAjAJS6EDiQkOZFUcIkJogMJBUkORoQCLFZYeEqyw1VwcVejA0WLcg9JNpgKLp4WdKAso6goJcmCW0GKIxDwcuFWAAY8WBQUZ2cXl2ZnF2BVEOxqlKHCz69iyM8vi1VBk4hmS7yvb3ySr28kVgW5IqINegICeqYCAmpYFSSkx2W66Oi4+OnoOGBVYKmi4mavomLvpqJiiVWBlrCwuYGwsIG5sLAWVgWBzs7xIc7OIfHOzoFYFcjy8xvi9WZJXl5lWV5eWWVeXgnOkCQY1LRWUJhc1ZyTVpFcV59cjU1BqLSxu4+qfrRcRKxMHTYF2j4tLU5KMS1mNnYmWK3Q9W9pafSWi4jSUA/HqsBf3irA1lo+ulZGuga7I/PDirKCUltaEhOpHw58XlgBH0wBtuwPBsxASQAv4AqdzNimnQAAAABJRU5ErkJggg==");
+		}
+		.leaflet-top.leaflet-right{display:none;}
+	</style>
+</head>
+
+<script>
+var bigMap = undefined;
+
+var layer = L.layerGroup();
+var mapInit = function(){
+	var mbUrl = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
+
+	var grayscale   = L.tileLayer(mbUrl, {id: 'mapbox.light'}),
+		streets  = L.tileLayer(mbUrl, {id: 'mapbox.streets'});
+
+
+	bigMap = L.map('map', {
+		center: [55.751244, 37.618423],
+		zoom: 12,
+		layers: [grayscale, layer]
+	});
+
+	var baseLayers = {
+		"Grayscale": grayscale,
+		"Streets": streets,
+
+	};
+
+
+
+	L.control.layers(baseLayers, {"Csv": layer}).addTo(bigMap);
+}
+
+
+let openCsv = function(e){
+	var input = e.target;
+
+    var reader = new FileReader();
+    reader.onload = function(){
+		//let result = reader.result;
+		drawCsv(reader.result)
+    };
+    reader.readAsText(input.files[0]);
+}	
+
+let drawCsv = function(csvData){
+	
+	let csvToJson = function(csv){
+			let answer = [];
+			let objKeys = [];
+			let lines = csv.split('\n');
+		    for(let i = 0; i < lines.length; i++){
+		    	if (lines[i] == "")continue;
+		    	let colomns = lines[i].split(',') 
+		    	let obj = {};
+		    	for(let j = 0; j < colomns.length; j++){
+		      		let val = colomns[j];
+		      		
+		      		if (i == 0){ 
+						objKeys.push(val.trim());
+		      		}else{
+		      			obj[objKeys[j]] = val;
+		      		}
+		  		}
+		  		if(i != 0)answer.push(obj);
+		    }
+
+		    return answer;
+		}
+
+	let data = csvToJson(csvData).map(el => {
+		let obj = {};
+		obj.lon = +el.lon;
+		obj.lat = +el.lat;
+		obj.radius = +el.radius;
+		obj.text = el.text;
+		obj.color = el.color;	
+		return obj;
+	})
+
+	
+	let csvColors = {
+		"defaultColor": "red",
+		"opacity": 0.7,
+		"track": {
+			"weight":3,
+			"color": "green" 
+		} 
+	}
+	let trackCoords = [];
+	let circlesArr = [];
+	for(let i in data){
+		let zone = data[i];
+		if(!zone.color)zone.color = csvColors.defaultColor;
+		trackCoords.push([zone.lat, zone.lon])
+		var circle = L.circle([zone.lat, zone.lon],{radius: zone.radius, weight:0, fillColor: zone.color, fillOpacity: csvColors.opacity});
+		circle.bindTooltip(zone.text)
+		circlesArr.push(circle);
+		
+	}
+	var featureGroup = L.featureGroup(circlesArr).addTo(layer);
+	L.polyline(trackCoords, {color: csvColors.track.color, weight:csvColors.track.weight}).addTo(layer);
+	
+	bigMap.fitBounds(featureGroup.getBounds());
+	
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+	mapInit()
+})
+</script>
+<body>
+<div id='map'></div>
+<buttons>
+	<button id="upload" onchange='openCsv(event)' title="Загрузить CSV"><label for='realInput'><icon></icon></label></button>
+
+	<button id="clear" title="Очистить" onclick='layer.clearLayers();'><icon></icon></button>
+	<input type='file' id='realInput' accept='.csv' onchange='openCsv(event)'>
+</buttons>
+</body>
+</html>

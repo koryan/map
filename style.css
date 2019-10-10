@@ -35,7 +35,10 @@ table td.buttons>*>noData{cursor:help;display:none;width:16px;height:16px;backgr
 table td.buttons>*>smallLoader{position:absolute;top: .5em;left: 1em;display:none;width:16px;height:16px;background-image: url(./img/smallLoader.gif)}
 table td.buttons>#csv{width:0px;padding:0px;}
 table td.buttons button.csv{padding-top:0px;padding-bottom:0px}
+
 table td.buttons button.csv img{height: 1.4em;position:relative;top:3px;}
+table td.buttons button#clear{padding:2px 14px;}
+table td.buttons button#clear>*{vertical-align: middle}
 
 div#pointInfo{border:1px dashed gray;position:relative;padding:10px 5px 4px;font-size:90%;}
 div#pointInfo:before{content:"Информация по точке";background-color:white;position:absolute;font-size: 90%;top: -9px;left: 8px;}
