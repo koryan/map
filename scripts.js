@@ -222,12 +222,13 @@ function getData(type){
 				return;
 			}
 			
-			response.json().then(function(data) {  
-		        //console.log(data);  
-
-		        
-				cb(false, data)	
-		    });  
+			response.text().then(function(data) {  
+				if(data.length == 0){
+					cb(false, [])
+					return;
+				}
+				cb(false, JSON.parse(data))	
+		    })
 	    }).catch(function(err) {  
 	    	console.log(err)
 		    cb(err);
@@ -322,6 +323,7 @@ function getData(type){
 				countRepeats = 1;
 				prev = ""+coords;
 			}
+			console.log(type,colors[type])
 			var polyline = L.polyline(lineCoords, {color: colors[type].track.color, weight:colors[type].track.weight}).addTo(layers.csv);
 
 			//check if we're loading tracks and fit to track or to point
@@ -401,8 +403,7 @@ function getData(type){
 				console.log(err);
 				return;
 			}
-			let cellSettings = towerCellsSettings; //from colors.json
-
+			let cellSettings = globalSettings.colors.points.towerCells; 
 			for(i in data){
 				let cell = data[i];
 				let text = createText({id:cell.id,radius: cell.max_radius, lac: cell.lac})
