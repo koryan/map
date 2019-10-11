@@ -30,18 +30,18 @@ table tr>td{padding:0px;}
 table tr>td:first-of-type{padding-right:5px;width:20%;}
 table tr:first-of-type input{width:97.5%;}
 
-table td.buttons>button[disabled]{cursor:not-allowed;opacity: .5}
+table td.buttons>button[disabled]{cursor:not-allowed;opacity: .4}
 table td.buttons>button.loading{cursor:wait;}
-table td.buttons>button{height:42px;min-width:100px;display:inline-block;vertical-align: middle;margin-bottom: 4px;font-size:120%;padding: 5px 20px;position:relative;white-space: nowrap;cursor:pointer;}
+table td.buttons>button{height:42px;min-width:120px;display:inline-block;vertical-align: middle;margin-bottom: 4px;font-size:120%;padding: 5px 20px;position:relative;white-space: nowrap;cursor:pointer;}
 table td.buttons>button>noData{cursor:help;display:none;width:16px;height:16px;background-size: contain;background-image: url(./img/cancel.png)}
 table td.buttons>button>smallLoader{position:absolute;top: .5em;left: calc(50% - 8px);display:none;width:16px;height:16px;background-image: url(./img/smallLoader.gif)}
 table td.buttons>#csv{width:0px;padding:0px;}
 table td.buttons>#cellTowers{width:0px;padding:0px;}
 
 
-table td.buttons button.csv{padding-top:0px;padding-bottom:0px}
-
-
+table td.buttons button.csv{padding:0px}
+table td.buttons button.csv>label{cursor:pointer;width: 100%;height: 100%;display: block;}
+table td.buttons button.csv>label>*{margin-top:4px;}
 table td.buttons button#clear{padding-top:4px}
 
 table td.buttons button>*{vertical-align: middle}
