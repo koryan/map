@@ -25,6 +25,9 @@ var globalSettings = undefined;
 $.get("settings.json", function(data){
 	try{
 		globalSettings = JSON.parse(data)
+		$("body").removeClass("loading")
+		mapInit()
+
 	}catch(err){
 		console.log(err)
 		$("body").html("<h1 id='settingsLoadError'>Парус!! Порвали парус!<br /><span>Проверь settings.json</span><pre>"+err+"</pre></h1>")
@@ -73,7 +76,7 @@ $( function() {
 } );
 
 document.addEventListener("DOMContentLoaded", function() {
-	mapInit()
+	
 	//getData()
 	$('#putIvansNumber').click(function(){
 		$("#msisdn").val(defaultMsisdn);
@@ -210,12 +213,12 @@ function getData(type){
 		
 		$("#"+ type +">smallLoader").css("display", "block")
 		$("#"+ type +">span").css("visibility", "hidden");
-		$("#"+ type).prop( "disabled", true );
+		$("#"+ type).prop( "disabled", true ).addClass("loading");
 		fetch(uri).then(function(response){
 
 			$("#"+ type +">smallLoader").css("display", "none")
 			$("#"+ type +">span").css("visibility", "visible");
-			$("#"+ type).prop( "disabled", false );
+			$("#"+ type).prop( "disabled", false ).removeClass("loading");;
 
 			if(response.status !== 200){
 				cb(response.status, response)
@@ -356,8 +359,6 @@ function getData(type){
 		let magicEmpiricalNumber = 62661.2321733;
 		let geoArr = [];
 		let gzSettings = globalSettings.colors.geozones
-		console.log("gzSettings", gzSettings)
-
 		
 		doRequest("geozones", function(err, data){		
 			if(err){
@@ -376,11 +377,7 @@ function getData(type){
 					return L.circle([gz.poiCenter[0], gz.poiCenter[1]],{radius: radius, color: gzSettings.border.color, weight:gzSettings.border.weight, fillColor: bgColor, fillOpacity: gzSettings.opacity}).bindTooltip(text, {className: 'myTooltip'});
 				}
 			}).filter(el => el);
-			let fg = L.featureGroup(geoArr).addTo(layers.geozones);
-			//bigMap.fitBounds(fg.getBounds());
-
-
-			
+			L.featureGroup(geoArr).addTo(layers.geozones);
 		})
 	}
 
@@ -428,8 +425,6 @@ function getData(type){
 	}
 	
 	
-	console.log("type", type)
-
 	if (type == 'geozones'){
 		drawGeozones()
 	}else if(type == 'cellTowers'){
@@ -455,13 +450,25 @@ var mapInit = function(){
 	var grayscale   = L.tileLayer(mbUrl, {id: 'mapbox.light'}),
 		streets  = L.tileLayer(mbUrl, {id: 'mapbox.streets'});
 
+	var onZoom = function(){
+		let check = bigMap.getBounds().getNorth() - bigMap.getBounds().getSouth() > globalSettings.maxMapSizeForCellTowers && 
+			bigMap.getBounds().getEast() - bigMap.getBounds().getWest() > globalSettings.maxMapSizeForCellTowers
+		$("#cellTowers").prop( "disabled", check );
+		
+		//$("#cellTowers").prop( "title", $("#cellTowers").prop("correctTitle"))
+		$("#cellTowers").prop( "title", (!check)? $("#cellTowers").attr("correctTitle"):$("#cellTowers").attr("wrongTitle"))
+	}
 
 	bigMap = L.map('map', {
 		center: [55.751244, 37.618423],
 		zoom: 12,
 		layers: [grayscale, layers.cities, layers.csv, layers.markersLayer, layers.pointsLayer, layers.geozones, layers.cellsZones, layers.cells]
-	});
+	}).on('zoomend', function() {
+    	onZoom();
+	});;
 
+	
+	
 	var baseLayers = {
 		"Grayscale": grayscale,
 		"Streets": streets
@@ -477,6 +484,8 @@ var mapInit = function(){
 	};
 
 	L.control.layers(baseLayers, overlays).addTo(bigMap);
+
+	onZoom();
 }
 
 

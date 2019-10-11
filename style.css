@@ -13,6 +13,7 @@ body{
 	height: 100%;
 	
 }
+#map.loading{background-color: lightgray}
 .myTooltip{
 	border-color: red;
 	border-radius: 10px	 
@@ -29,10 +30,11 @@ table tr>td{padding:0px;}
 table tr>td:first-of-type{padding-right:5px;width:20%;}
 table tr:first-of-type input{width:97.5%;}
 
-table td.buttons>button[disabled]{cursor:wait;}
+table td.buttons>button[disabled]{cursor:not-allowed;opacity: .5}
+table td.buttons>button.loading{cursor:wait;}
 table td.buttons>button{height:42px;min-width:100px;display:inline-block;vertical-align: middle;margin-bottom: 4px;font-size:120%;padding: 5px 20px;position:relative;white-space: nowrap;cursor:pointer;}
 table td.buttons>button>noData{cursor:help;display:none;width:16px;height:16px;background-size: contain;background-image: url(./img/cancel.png)}
-table td.buttons>button>smallLoader{position:absolute;top: .5em;left: 1em;display:none;width:16px;height:16px;background-image: url(./img/smallLoader.gif)}
+table td.buttons>button>smallLoader{position:absolute;top: .5em;left: calc(50% - 8px);display:none;width:16px;height:16px;background-image: url(./img/smallLoader.gif)}
 table td.buttons>#csv{width:0px;padding:0px;}
 table td.buttons>#cellTowers{width:0px;padding:0px;}
 
@@ -44,7 +46,6 @@ table td.buttons button#clear{padding-top:4px}
 
 table td.buttons button>*{vertical-align: middle}
 table td.buttons button>*>*{vertical-align: middle}
-
 
 
 div#pointInfo{border:1px dashed gray;position:relative;padding:10px 5px 4px;font-size:90%;}

@@ -21,7 +21,7 @@
 </head>
 <body>
 
-<div id='map'></div><div id='controls'>
+<div id='map' class='loading'></div><div id='controls'>
 	<table>
 		<caption>Параметр<span id='putIvansNumber'>ы</span>
 		</caption>
@@ -71,7 +71,7 @@
 					<noData title='Нет данных'></noData>
 					<span><img alt="Геозоны" src='./img/geozone.png'></span>
 				</button>
-				<button id='cellTowers'  title='Данные по вышкам'>
+				<button id='cellTowers' correctTitle="Сотовые вышки" wrongTitle="Сотовые вышки (приблизьте карту)">
 					<smallLoader></smallLoader>
 					<noData title='Нет данных'></noData>
 					<span><img alt="Вышки" src='./img/cellTower.png'></span>

@@ -131,7 +131,7 @@
 	},
 
 	"geozones": {
-		"color": "red",
+		"defaultColor": "blue",
 		"opacity": 0.2,
 		"border": {
 			"color":"green",
