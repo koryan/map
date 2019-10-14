@@ -24,7 +24,12 @@ var globalSettings = undefined;
 //get settings
 $.get("settings.json", function(data){
 	try{
-		globalSettings = JSON.parse(data)
+		console.log(data, typeof data)
+		if(typeof data == "object"){
+			globalSettings  = data
+		}else{
+			globalSettings = JSON.parse(data)
+		}
 		$("body").removeClass("loading")
 		mapInit()
 
