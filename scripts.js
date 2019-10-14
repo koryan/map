@@ -38,10 +38,10 @@ $.get("settings.json", function(data){
 //init date & time
 $( function() {
     var dateFormat = "dd.mm.yy",
-      fromDate = $( "#fromDate" ).datepicker({dateFormat: dateFormat, maxDate: new Date()}).on( "change", function() {
+      fromDate = $( "#fromDate" ).datepicker({firstDay: 1, dateFormat: dateFormat, maxDate: new Date()}).on( "change", function() {
         	tillDate.datepicker( "option", "minDate", getDate( this ) );
         }),
-      tillDate = $( "#tillDate" ).datepicker({dateFormat: dateFormat, maxDate: new Date()}).on( "change", function() {
+      tillDate = $( "#tillDate" ).datepicker({firstDay: 1, dateFormat: dateFormat, maxDate: new Date()}).on( "change", function() {
         	fromDate.datepicker( "option", "maxDate", getDate( this ) );
       	});
 
@@ -92,7 +92,7 @@ document.addEventListener("DOMContentLoaded", function() {
 		let type = e.currentTarget.id
 		if(!!~['raw','processed', 'live', 'last', 'geozones', 'cellTowers'].indexOf(type)){
 			getData(type)
-		}else if(!!~['csv','clear'].indexOf(type)){
+		}else if(!!~['clear'].indexOf(type)){
 			layers.clear()
 		}
 	})

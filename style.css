@@ -2,7 +2,7 @@ html, body {
 	height: 100%;
 	margin: 0;
 	font-family: Arial;
-	font-size: 18px
+	font-size: 20px
 }
 body{
 	display:flex;
@@ -32,7 +32,7 @@ table tr:first-of-type input{width:97.5%;}
 
 table td.buttons>button[disabled]{cursor:not-allowed;opacity: .4}
 table td.buttons>button.loading{cursor:wait;}
-table td.buttons>button{height:42px;min-width:120px;display:inline-block;vertical-align: middle;margin-bottom: 4px;font-size:120%;padding: 5px 20px;position:relative;white-space: nowrap;cursor:pointer;}
+table td.buttons>button{height:42px;min-width:120px;display:inline-block;vertical-align: middle;margin-bottom: 4px;font-size:1em;padding: 5px 20px;position:relative;white-space: nowrap;cursor:pointer;}
 table td.buttons>button>noData{cursor:help;display:none;width:16px;height:16px;background-size: contain;background-image: url(./img/cancel.png)}
 table td.buttons>button>smallLoader{position:absolute;top: .5em;left: calc(50% - 8px);display:none;width:16px;height:16px;background-image: url(./img/smallLoader.gif)}
 table td.buttons>#csv{width:0px;padding:0px;}
