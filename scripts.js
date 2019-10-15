@@ -24,7 +24,6 @@ var globalSettings = undefined;
 //get settings
 $.get("settings.json", function(data){
 	try{
-		console.log(data, typeof data)
 		if(typeof data == "object"){
 			globalSettings  = data
 		}else{
@@ -310,7 +309,7 @@ function getData(type){
 				}
 
 				var circle  = L.circle(      coords,{radius: radius, weight: colors[type].circle.border.weight, color: colors[type].circle.border.color, fillColor: colors[type].circle.background, fillOpacity: .05});
-				let cCenter = L.circleMarker(coords,{text:pointsListText, radius: 10,     weight: colors[type].point.border.weight,  color: colors[type].point.border.color, fillColor: colors[type].point.background});
+				let cCenter = L.circleMarker(coords,{text:pointsListText, radius: 5,     weight: colors[type].point.border.weight,  color: colors[type].point.border.color, fillColor: colors[type].point.background});
 
 
 				if (usedCoords[""+coords].length > globalSettings.maxPointLengthInTooltip)
