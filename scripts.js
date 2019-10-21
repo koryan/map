@@ -237,7 +237,10 @@ function getData(type){
 				cb(false, JSON.parse(data))	
 		    })
 	    }).catch(function(err) {  
-	    	console.log(err)
+	    	$("#"+ type +">smallLoader").css("display", "none")
+			$("#"+ type +">span").css("visibility", "visible");
+			$("#"+ type).prop( "disabled", false ).removeClass("loading");;
+
 		    cb(err);
 		});
 		
