@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Ясделие «Ложный след»‎</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js" integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og==" crossorigin=""></script>
+    <style>
+    	html, body {
+			height: 100%;
+			margin: 0;
+			font-family: Arial;
+			font-size: 18px
+		}
+		button:focus {outline:0;}
+		body{
+			position:relative;
+		}
+		#clear icon{
+			transform:scale(.75);
+			display:inline-block;width:32px;height:32px;
+			margin: -4px 0px -7px;
+			background-image: url("data:image/png;base64,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")
+		}
+		buttons>errors{display:block;text-align:right;}
+		buttons>errors>error{margin-bottom:5px;color:white;display:inline-block;font-weight:bold;font-size:100%;background-color: red;text-align:right;padding:15px 20px;}
+		buttons{display:block;position:absolute;right:10px;top:10px;z-index:1000;width:300px;}
+		buttons>group{display:block;margin: 5px 0px}
+		buttons>group>*{width:33.33%;cursor: pointer;padding:10px 5px;}
+		buttons>group>*.selected{border:2px solid gray;box-shadow:inset 0px 0px 6px 6px grey;}
+		#msisdn{width:100%;padding:3px 2px;box-sizing: border-box;text-align:right;}
+		#clear{width:100%;text-align:center;cursor:pointer;margin-bottom:10px;}
+		#map {
+			height: 100%;
+			width:100%;
+		}
+		.leaflet-top.leaflet-right{display:none;}
+	</style>
+</head>
+
+<script>
+var bigMap = undefined;
+let selectedPosMethod = undefined;
+let url = "http://10.74.0.226:9006/ldtdpsvc/rest/v0/mapp/receiver"
+let dataDefault = {"sender":"m2m","profile":"poisk","version":"v0","method":"teledata","teledata":[{"subscriberId":undefined,"source":"mobapp","inputValues":[{"inputs":[{"i":12432,"v":{"latitude":undefined,"longitude":undefined,"radius":undefined,"pos_method":undefined,"metroName":null,"stationType":null}},{"i":16384,"v":undefined}]}]}]}
+
+let showError = function(text){
+	let err = $("<error>"+text+"<error>")
+	$("buttons>errors").append(err)
+	setTimeout(() => {
+		err.remove()
+	}, 1000)
+}
+let genSendingObj = function(msisdn, latlng, pos_method){
+	let radiuses = {
+		2: 100,
+		8192:200,
+		4096: 300
+	}
+
+	let obj = Object.assign({}, dataDefault);
+	obj.teledata[0].subscriberId = "msisdn"+msisdn
+	obj.teledata[0].inputValues[0].inputs[0].v.latitude = latlng.lat
+	obj.teledata[0].inputValues[0].inputs[0].v.longitude = latlng.lng
+	obj.teledata[0].inputValues[0].inputs[0].v.pos_method = pos_method
+	obj.teledata[0].inputValues[0].inputs[0].v.radius = radiuses[pos_method]
+	obj.teledata[0].inputValues[0].inputs[1].v = new Date().toISOString();
+	return obj;
+}
+let layer = L.layerGroup();
+let mapInit = function(){
+	var mbUrl = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
+
+	var grayscale   = L.tileLayer(mbUrl, {id: 'mapbox.light'}),
+		streets  = L.tileLayer(mbUrl, {id: 'mapbox.streets'});
+
+
+	bigMap = L.map('map', {
+		center: [55.751244, 37.618423],
+		zoom: 12,
+		layers: [grayscale, layer]
+	});
+
+	var baseLayers = {
+		"Grayscale": grayscale,
+		"Streets": streets,
+
+	};
+
+	let params = {
+		"color": "blue",
+		"opacity": 0.7,
+		"border": {
+			"color": "green",
+			"weight": 3
+		},
+		"temp":{
+			"color":"red",			
+			"borderColor":"green",
+			"radius":"10"
+		}
+	}
+
+
+	L.control.layers(baseLayers, {"layer": layer}).addTo(bigMap);
+	let radius = 100;
+	bigMap.on('click', (e) => {
+		let msisdn = $("#msisdn").val()
+		if(!msisdn || msisdn == ""){
+			showError("Введите номер абонента");
+			return
+		}
+		if(!new RegExp(/^\+7\(*\d{3}\)*\d{7}$/).test(msisdn)){
+			showError("Проверьте номер абонента");
+			return
+		}
+		if(!selectedPosMethod){
+			showError("Выберите POS-метод");
+			return
+		}
+		let temp = L.circleMarker(e.latlng, {radius: params.temp.radius, weight:1, fillColor: params.temp.color, color:params.temp.borderColor}).addTo(layer);
+		
+		let data = genSendingObj(msisdn, e.latlng, selectedPosMethod);
+		//return;
+		$.ajax({url:url, data:data, timeout: 1000, success:function(response){
+			console.log(response)
+			temp.remove();
+			L.circle(e.latlng, {radius:radius, weight:params.border.weight, fillColor: params.color, color:params.border.color, opacity: params.opacity}).addTo(layer);
+		}, error: function(err){
+			showError("Ошибка записи");
+	     	console.error(err)
+	     	temp.remove();
+		}})
+	})
+}
+
+
+
+
+
+// var circle = L.circle([zone.lat, zone.lon],{radius: zone.radius, weight:0, fillColor: zone.color, fillOpacity: csvColors.opacity});
+// 		circle.bindTooltip(zone.text)
+// 		circlesArr.push(circle);
+// 	var featureGroup = L.featureGroup(circlesArr).addTo(layer);
+// 	L.polyline(trackCoords, {color: csvColors.track.color, weight:csvColors.track.weight}).addTo(layer);
+	
+// 	bigMap.fitBounds(featureGroup.getBounds());
+
+document.addEventListener("DOMContentLoaded", function() {
+	mapInit()
+
+	$("group>button").click(function(e){
+		if($(this).hasClass("selected")){
+			$(this).removeClass("selected");
+			selectedPosMethod = undefined
+		}else{
+			$("buttons>group>*.selected").removeClass("selected")
+			$(this).addClass("selected")
+			selectedPosMethod = +($(this).html())
+		}
+		
+	})
+
+})
+
+
+
+</script>
+<body>
+<div id='map'></div>
+<buttons>
+	<input id="msisdn" placeholder="Номер абонента" />
+	<group>
+		<button id='first'>8192</button><button 
+		id='second'>4096</button><button 
+		id='third'>2</button>
+	</group>
+
+
+	<button id="clear" title="Очистить" onclick='layer.clearLayers();'><icon></icon></button>
+	<errors></errors>
+</buttons>
+</body>
+</html>
+
