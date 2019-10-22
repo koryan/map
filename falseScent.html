@@ -46,9 +46,34 @@
 <script>
 var bigMap = undefined;
 let selectedPosMethod = undefined;
-let url = "http://10.74.0.226:9006/ldtdpsvc/rest/v0/mapp/receiver"
+let url = "http://10.72.12.8:9006/ldtdpsvc/rest/v0/mapp/receiver"
 let dataDefault = {"sender":"m2m","profile":"poisk","version":"v0","method":"teledata","teledata":[{"subscriberId":undefined,"source":"mobapp","inputValues":[{"inputs":[{"i":12432,"v":{"latitude":undefined,"longitude":undefined,"radius":undefined,"pos_method":undefined,"metroName":null,"stationType":null}},{"i":16384,"v":undefined}]}]}]}
-
+let params = {
+		"borderWeight": 3,
+		"opacity": 1,
+		"pos":{
+			8192:{
+				bg: "red",
+				border: "green",
+				radius: 100
+			},
+			2:{
+				bg: "blue",
+				border: "red",
+				radius: 200
+			},
+			4096:{
+				bg: "white",
+				border: "blue",
+				radius: 300
+			}
+		},
+		"temp":{
+			"color":"red",			
+			"borderColor":"green",
+			"radius":"10"
+		}
+	}
 let showError = function(text){
 	let err = $("<error><p>"+text+"</p><error>")
 	$("buttons>errors").append(err)
@@ -58,18 +83,14 @@ let showError = function(text){
 	}, 1000)
 }
 let genSendingObj = function(msisdn, latlng, pos_method){
-	let radiuses = {
-		2: 100,
-		8192:200,
-		4096: 300
-	}
+	
 
 	let obj = Object.assign({}, dataDefault);
 	obj.teledata[0].subscriberId = "msisdn"+msisdn
 	obj.teledata[0].inputValues[0].inputs[0].v.latitude = latlng.lat
 	obj.teledata[0].inputValues[0].inputs[0].v.longitude = latlng.lng
 	obj.teledata[0].inputValues[0].inputs[0].v.pos_method = pos_method
-	obj.teledata[0].inputValues[0].inputs[0].v.radius = radiuses[pos_method]
+	obj.teledata[0].inputValues[0].inputs[0].v.radius = params.pos[pos_method].radius
 	obj.teledata[0].inputValues[0].inputs[1].v = new Date().toISOString();
 	return obj;
 }
@@ -93,23 +114,10 @@ let mapInit = function(){
 
 	};
 
-	let params = {
-		"color": "blue",
-		"opacity": 0.7,
-		"border": {
-			"color": "green",
-			"weight": 3
-		},
-		"temp":{
-			"color":"red",			
-			"borderColor":"green",
-			"radius":"10"
-		}
-	}
+
 
 
 	L.control.layers(baseLayers, {"layer": layer}).addTo(bigMap);
-	let radius = 100;
 	bigMap.on('click', (e) => {
 		let msisdn = $("#msisdn").val()
 		if(!msisdn || msisdn == ""){
@@ -135,11 +143,23 @@ let mapInit = function(){
 			processData: false,
 			dataType: 'json',
 			contentType: 'application/json',
-			timeout: 5*60*1000,
+			timeout: 50*60*1000,
+			crossDomain: true,
+			beforeSend: function(xhr) {
+				xhr.setRequestHeader('Authorization', 'Basic bGR0ZHB1c2VyMTo4OUxjd3JOUlc1akI=')
+			},
 			success:function(response){
 				console.log(response)
 				temp.remove();
-				L.circle(e.latlng, {radius:radius, weight:params.border.weight, fillColor: params.color, color:params.border.color, opacity: params.opacity}).addTo(layer);
+				let pos_method = selectedPosMethod
+				let radius = params.pos[pos_method].radius;
+				L.circle(e.latlng, {
+					radius:radius, 
+					weight:params.borderWeight, 
+					fillColor: params.pos[pos_method].bg,
+					color: params.pos[pos_method].border,
+					opacity: params.opacity
+				}).addTo(layer);
 			}, 
 			error: function(err){
 				showError("Ошибка записи");
@@ -154,13 +174,7 @@ let mapInit = function(){
 
 
 
-// var circle = L.circle([zone.lat, zone.lon],{radius: zone.radius, weight:0, fillColor: zone.color, fillOpacity: csvColors.opacity});
-// 		circle.bindTooltip(zone.text)
-// 		circlesArr.push(circle);
-// 	var featureGroup = L.featureGroup(circlesArr).addTo(layer);
-// 	L.polyline(trackCoords, {color: csvColors.track.color, weight:csvColors.track.weight}).addTo(layer);
-	
-// 	bigMap.fitBounds(featureGroup.getBounds());
+
 
 document.addEventListener("DOMContentLoaded", function() {
 	mapInit()
