@@ -128,15 +128,25 @@ let mapInit = function(){
 		
 		let data = genSendingObj(msisdn, e.latlng, selectedPosMethod);
 		//return;
-		$.ajax({url:url, data:data, timeout: 5*60*1000, success:function(response){
-			console.log(response)
-			temp.remove();
-			L.circle(e.latlng, {radius:radius, weight:params.border.weight, fillColor: params.color, color:params.border.color, opacity: params.opacity}).addTo(layer);
-		}, error: function(err){
-			showError("Ошибка записи");
-	     	console.error(err)
-	     	temp.remove();
-		}})
+
+		$.ajax({url:url,
+			method: "post",
+			data:JSON.stringify(data), 
+			processData: false,
+			dataType: 'json',
+			contentType: 'application/json',
+			timeout: 5*60*1000,
+			success:function(response){
+				console.log(response)
+				temp.remove();
+				L.circle(e.latlng, {radius:radius, weight:params.border.weight, fillColor: params.color, color:params.border.color, opacity: params.opacity}).addTo(layer);
+			}, 
+			error: function(err){
+				showError("Ошибка записи");
+		     	console.error(err)
+		     	temp.remove();
+			}
+		})
 	})
 }
 
