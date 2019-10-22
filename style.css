@@ -13,6 +13,7 @@ body{
 	height: 100%;
 	
 }
+#ui-datepicker-div{z-index:1000 !important;}
 #map.loading{background-color: lightgray}
 .myTooltip{
 	border-color: red;
@@ -21,32 +22,32 @@ body{
 #controls{flex: 25%;padding:15px 20px;}
 #controls table{width:100%;margin-bottom:20px;}
 #controls table>caption{text-align: left;font-weight:bold;margin-bottom:15px;font-size:110%;}
-#ui-datepicker-div{z-index:1000;}
-table input{padding:0px 3px;font-size:90%;text-align:right;box-sizing: border-box; }
-table tr.datetime input{}
-table tr.datetime input:first-of-type{min-width:5.6em;width:58%;}
-table tr.datetime input:last-of-type{min-width:3.1em;width:38%;}
-table tr>td{padding:0px;}
-table tr>td:first-of-type{padding-right:5px;width:40%;}
-table tr:first-of-type input{width:97.5%;}
 
-table td.buttons{padding-top:15px;}
-table td.buttons>button[disabled]{cursor:not-allowed;opacity: .4}
-table td.buttons>button.loading{cursor:wait;}
-table td.buttons>button{height:42px;min-width:5.2em;display:inline-block;vertical-align: middle;margin-bottom: 4px;font-size:1em;padding: 5px 20px;position:relative;white-space: nowrap;cursor:pointer;}
-table td.buttons>button>noData{cursor:help;display:none;width:16px;height:16px;background-size: contain;background-image: url(./img/cancel.png)}
-table td.buttons>button>smallLoader{position:absolute;top: .5em;left: calc(50% - 8px);display:none;width:16px;height:16px;background-image: url(./img/smallLoader.gif)}
-table td.buttons>#csv{width:0px;padding:0px;}
-table td.buttons>#cellTowers{width:0px;padding:0px;}
+#controls table input{padding:0px 3px;font-size:90%;text-align:right;box-sizing: border-box; }
+#controls table tr.datetime input{}
+#controls table tr.datetime input:first-of-type{min-width:5.6em;width:58%;}
+#controls table tr.datetime input:last-of-type{min-width:3.1em;width:38%;}
+#controls table tr>td{padding:0px;}
+#controls table tr>td:first-of-type{padding-right:5px;width:40%;}
+#controls table tr:first-of-type input{width:97.5%;}
 
-table td.buttons button img{width:1.5em;height:1.5em;}
-table td.buttons button.csv{padding:0px}
-table td.buttons button.csv>label{cursor:pointer;width: 100%;height: 100%;display: block;}
-table td.buttons button.csv>label>*{margin-top:4px;}
-table td.buttons button#clear{padding-top:4px}
+#controls table td.buttons{padding-top:15px;}
+#controls table td.buttons>button[disabled]{cursor:not-allowed;opacity: .4}
+#controls table td.buttons>button.loading{cursor:wait;}
+#controls table td.buttons>button{height:42px;min-width:5.2em;display:inline-block;vertical-align: middle;margin-bottom: 4px;font-size:1em;padding: 5px 20px;position:relative;white-space: nowrap;cursor:pointer;}
+#controls table td.buttons>button>noData{cursor:help;display:none;width:16px;height:16px;background-size: contain;background-image: url(./img/cancel.png)}
+#controls table td.buttons>button>smallLoader{position:absolute;top: .5em;left: calc(50% - 8px);display:none;width:16px;height:16px;background-image: url(./img/smallLoader.gif)}
+#controls table td.buttons>#csv{width:0px;padding:0px;}
+#controls table td.buttons>#cellTowers{width:0px;padding:0px;}
 
-table td.buttons button>*{vertical-align: middle}
-table td.buttons button>*>*{vertical-align: middle}
+#controls table td.buttons button img{width:1.5em;height:1.5em;}
+#controls table td.buttons button.csv{padding:0px}
+#controls table td.buttons button.csv>label{cursor:pointer;width: 100%;height: 100%;display: block;}
+#controls table td.buttons button.csv>label>*{margin-top:4px;}
+#controls table td.buttons button#clear{padding-top:4px}
+
+#controls table td.buttons button>*{vertical-align: middle}
+#controls table td.buttons button>*>*{vertical-align: middle}
 
 
 div#pointInfo{border:1px dashed gray;position:relative;padding:10px 5px 4px;font-size:90%;}

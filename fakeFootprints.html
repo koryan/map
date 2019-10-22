@@ -14,7 +14,12 @@
 			font-family: Arial;
 			font-size: 18px
 		}
+		button{background: linear-gradient(to top, rgba(153,153,153,1) 0%, rgba(255,255,255,1) 100%);}
+		button:active, button.selected{background: linear-gradient(to bottom, rgba(153,153,153,1) 0%, rgba(255,255,255,1) 100%);}
 		button:focus {outline:0;}
+		button::-moz-focus-inner {
+		  border: 0;
+		}
 		body{
 			position:relative;
 		}
@@ -26,12 +31,12 @@
 		}
 		buttons>errors{display:block;text-align:right;}
 		buttons>errors>error{width:0%;transition:all 1s ease-out;margin-bottom:5px;color:white;display:inline-block;font-weight:bold;font-size:100%;background-color: red;text-align:right;}
-		buttons>errors>error.on{width:100%;transition:all 1s ease-out;}
+		buttons>errors>error.on{width:auto;transition:all 1s ease-out;}
 		buttons>errors>error>p{padding:10px 15px;margin:0px;}
 		buttons{display:block;position:absolute;right:10px;top:10px;z-index:1000;width:300px;}
 		buttons>group{display:block;margin: 5px 0px}
 		buttons>group>*{width:33.33%;cursor: pointer;padding:10px 5px;}
-		buttons>group>*.selected{border:2px solid gray;box-shadow:inset 0px 0px 6px 0px grey;}
+		buttons>group>*.selected{}
 
 		#msisdn{width:100%;padding:3px 2px;box-sizing: border-box;text-align:right;}
 		#clear{width:100%;text-align:center;cursor:pointer;margin-bottom:10px;}
@@ -80,7 +85,7 @@ let showError = function(text){
 	err.addClass("on")
 	setTimeout(() => {
 		err.remove()
-	}, 1000)
+	}, 100000)
 }
 let genSendingObj = function(msisdn, latlng, pos_method){
 	
