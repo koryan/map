@@ -22,7 +22,7 @@ var bigMap = undefined;
 var globalSettings = undefined;
 
 //get settings
-$.get("settings.json", function(data){
+$.get("settings.json").done(function(data){
 	try{
 		if(typeof data == "object"){
 			globalSettings  = data
@@ -33,9 +33,14 @@ $.get("settings.json", function(data){
 		mapInit()
 
 	}catch(err){
-		console.log(err)
-		$("body").html("<h1 id='settingsLoadError'>Парус!! Порвали парус!<br /><span>Проверь settings.json</span><pre>"+err+"</pre></h1>")
+		console.error(err)
+		$("body").html("<h1 id='settingsLoadError'>Парус!! Порвали парус!<br /><span>Проверь валидность settings.json</span><pre>"+err+"</pre></h1>")
 	}
+}).fail(function(err){
+	console.error(err)
+	if(typeof err == "object")err = JSON.stringify(err)
+	$("body").html("<h1 id='settingsLoadError'>Парус!! Порвали парус!<br /><span>Проверь доступность settings.json</span><pre>"+err+"</pre></h1>")
+	
 })
 
 
