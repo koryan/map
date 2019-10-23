@@ -52,9 +52,8 @@
 <script>
 var bigMap = undefined;
 let selectedPosMethod = undefined;
-let url = "http://10.72.12.8:9006/ldtdpsvc/rest/v0/mapp/receiver"
-let dataDefault = {"sender":"m2m","profile":"poisk","version":"v0","method":"teledata","teledata":[{"subscriberId":undefined,"source":"mobapp","inputValues":[{"inputs":[{"i":12432,"v":{"latitude":undefined,"longitude":undefined,"radius":undefined,"pos_method":undefined,"metroName":null,"stationType":null}},{"i":16384,"v":undefined}]}]}]}
-let params = {
+let url = "http://10.72.12.98/setCoords"
+let settings = {
 		"borderWeight": 3,
 		"opacity": 1,
 		"pos":{
@@ -88,18 +87,7 @@ let showError = function(text){
 		err.remove()
 	}, 1000)
 }
-let genSendingObj = function(msisdn, latlng, pos_method){
-	
 
-	let obj = Object.assign({}, dataDefault);
-	obj.teledata[0].subscriberId = "msisdn"+msisdn
-	obj.teledata[0].inputValues[0].inputs[0].v.latitude = latlng.lat
-	obj.teledata[0].inputValues[0].inputs[0].v.longitude = latlng.lng
-	obj.teledata[0].inputValues[0].inputs[0].v.pos_method = pos_method
-	obj.teledata[0].inputValues[0].inputs[0].v.radius = params.pos[pos_method].radius
-	obj.teledata[0].inputValues[0].inputs[1].v = new Date().toISOString();
-	return obj;
-}
 let layer = L.layerGroup();
 let mapInit = function(){
 	var mbUrl = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
@@ -138,42 +126,48 @@ let mapInit = function(){
 			showError("Выберите POS-метод");
 			return
 		}
-		let temp = L.circleMarker(e.latlng, {radius: params.temp.radius, weight:1, fillColor: params.temp.color, color:params.temp.borderColor}).addTo(layer);
+		let temp = L.circleMarker(e.latlng, {radius: settings.temp.radius, weight:1, fillColor: settings.temp.color, color:settings.temp.borderColor}).addTo(layer);
 		
-		let data = genSendingObj(msisdn, e.latlng, selectedPosMethod);
-		//return;
+		let data = {
+			msisdn: msisdn,
+			time: new Date().toISOString(),
+			post_method: selectedPosMethod,
+			rdius: settings.pos[selectedPosMethod].radius,
+			lat: e.latlng.lat,
+			lng: e.latlng.lng
+		}
 
-		$.ajax({url:url,
-			method: "post",
-			data:JSON.stringify(data), 
-			processData: false,
-			dataType: 'json',
-			contentType: 'application/json',
-			timeout: 50*60*1000,
-			crossDomain: true,
-			beforeSend: function(xhr) {
-				xhr.setRequestHeader('Authorization', 'Basic bGR0ZHB1c2VyMTo4OUxjd3JOUlc1akI=')
-			},
-			success:function(response){
-				console.log(response)
-				temp.remove();
-				let pos_method = selectedPosMethod
-				let radius = params.pos[pos_method].radius;
-				L.circle(e.latlng, {
-					radius:radius, 
-					weight:params.borderWeight, 
-					fillColor: params.pos[pos_method].bg,
-					color: params.pos[pos_method].border,
-					fillOpacity: params.opacity,
-					opacity: params.opacity
-				}).addTo(layer);
-			}, 
-			error: function(err){
+		let genParamsString = function(params){
+			return '?'+Object.keys(params).map(el => {
+				return el.trim()+"="+params[el].toString().trim()
+			}).join("&")
+		}
+
+		fetch(url+genParamsString(data)).then(function(response){
+			temp.remove();
+			if(response.status != 200){
 				showError("Ошибка записи");
-		     	console.error(err)
-		     	temp.remove();
+		     	console.error(response.status, response.statusText)
+		     	return;
 			}
-		})
+			
+			let pos_method = selectedPosMethod
+			let radius = settings.pos[pos_method].radius;
+			L.circle(e.latlng, {
+				radius:radius, 
+				weight:settings.borderWeight, 
+				fillColor: settings.pos[pos_method].bg,
+				color: settings.pos[pos_method].border,
+				fillOpacity: settings.opacity,
+				opacity: settings.opacity
+			}).addTo(layer);
+
+	    }).catch(function(err) {  
+	    	showError("Ошибка записи");
+	     	console.error(err)
+	     	temp.remove();
+		});
+		
 	})
 }
 
