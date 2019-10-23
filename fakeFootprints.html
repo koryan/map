@@ -14,8 +14,9 @@
 			font-family: Arial;
 			font-size: 18px
 		}
-		button{background: linear-gradient(to top, rgba(153,153,153,1) 0%, rgba(255,255,255,1) 100%);}
-		button:active, button.selected{background: linear-gradient(to bottom, rgba(153,153,153,1) 0%, rgba(255,255,255,1) 100%);}
+		button{background: linear-gradient(to top, rgba(153,153,153,.3) 0%, rgba(255,255,255,.5) 100%);font-size:0.9em;}
+		button:active{background: linear-gradient(to bottom, rgba(153,153,153,.3) 0%, rgba(255,255,255,.5) 100%)}
+		button.selected{background: linear-gradient(to bottom, rgba(153,153,153,.7) 0%, rgba(255,255,255,.9) 100%)}
 		button:focus {outline:0;}
 		button::-moz-focus-inner {
 		  border: 0;
@@ -85,7 +86,7 @@ let showError = function(text){
 	err.addClass("on")
 	setTimeout(() => {
 		err.remove()
-	}, 100000)
+	}, 1000)
 }
 let genSendingObj = function(msisdn, latlng, pos_method){
 	

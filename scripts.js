@@ -22,7 +22,7 @@ var bigMap = undefined;
 var globalSettings = undefined;
 
 //get settings
-$.get("settings.json").done(function(data){
+$.get("./settings.json").done(function(data){
 	try{
 		if(typeof data == "object"){
 			globalSettings  = data
