@@ -131,8 +131,8 @@ let mapInit = function(){
 		let data = {
 			msisdn: msisdn,
 			time: new Date().toISOString(),
-			post_method: selectedPosMethod,
-			rdius: settings.pos[selectedPosMethod].radius,
+			pos_method: selectedPosMethod,
+			radius: settings.pos[selectedPosMethod].radius,
 			lat: e.latlng.lat,
 			lng: e.latlng.lng
 		}
