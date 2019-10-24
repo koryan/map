@@ -137,5 +137,31 @@
 			"color":"green",
 			"weight": 1
 		}
+	},
+	"fakeFootprints":{
+		"borderWeight": 3,
+		"opacity": 1,
+		"pos":{
+			"8192":{
+				"bg": "red",
+				"border": "green",
+				"radius": 100
+			},
+			"2":{
+				"bg": "blue",
+				"border": "red",
+				"radius": 200
+			},
+			"4096":{
+				"bg": "white",
+				"border": "blue",
+				"radius": 300
+			}
+		},
+		"temp":{
+			"color":"red",			
+			"borderColor":"green",
+			"radius":"10"
+		}
 	}	
 }}

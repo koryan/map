@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Ясделие «Ложный след»‎</title>
+	<title>Операция «Ложный след»‎</title>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js" integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og==" crossorigin=""></script>
     <style>
+    	input.error{border: 2px solid red;}
     	html, body {
 			height: 100%;
 			margin: 0;
@@ -24,23 +25,26 @@
 		body{
 			position:relative;
 		}
-		#clear icon{
-			transform:scale(.75);
-			display:inline-block;width:32px;height:32px;
-			margin: -4px 0px -7px;
-			background-image: url("data:image/png;base64,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")
-		}
+	
 		buttons>errors{display:block;text-align:right;}
 		buttons>errors>error{width:0%;transition:all 1s ease-out;margin-bottom:5px;color:white;display:inline-block;font-weight:bold;font-size:100%;background-color: red;text-align:right;}
 		buttons>errors>error.on{width:auto;transition:all 1s ease-out;}
 		buttons>errors>error>p{padding:10px 15px;margin:0px;}
 		buttons{display:block;position:absolute;right:10px;top:10px;z-index:1000;width:300px;}
-		buttons>group{display:block;margin: 5px 0px}
+		buttons>group{display:block;margin: 5px 0px 10px}
 		buttons>group>*{width:33.33%;cursor: pointer;padding:10px 5px;}
 		buttons>group>*.selected{}
 
-		#msisdn{width:100%;padding:3px 2px;box-sizing: border-box;text-align:right;}
+		#msisdn, #geoMsisdn{padding:4px 2px;box-sizing: border-box;text-align:right;}
+		#msisdn{width:100%;}
+
+		#geoMsisdn{width:82%;}
+		div.geo{margin-bottom:10px;}
+		div.geo>*{vertical-align:middle;}
 		#clear{width:100%;text-align:center;cursor:pointer;margin-bottom:10px;}
+		#clear>img{vertical-align: middle}
+		#geoClear{text-align:center;cursor:pointer;width:3em;}
+		#geoClear>img{height:20px;vertical-align:middle;}
 		#map {
 			height: 100%;
 			width:100%;
@@ -53,32 +57,28 @@
 var bigMap = undefined;
 let selectedPosMethod = undefined;
 let url = "http://10.72.12.98/fakeFootprints"
-let settings = {
-		"borderWeight": 3,
-		"opacity": 1,
-		"pos":{
-			8192:{
-				bg: "red",
-				border: "green",
-				radius: 100
-			},
-			2:{
-				bg: "blue",
-				border: "red",
-				radius: 200
-			},
-			4096:{
-				bg: "white",
-				border: "blue",
-				radius: 300
-			}
-		},
-		"temp":{
-			"color":"red",			
-			"borderColor":"green",
-			"radius":"10"
+//get settings
+$.get("./settings.json").done(function(data){
+	try{
+		if(typeof data == "object"){
+			globalSettings  = data
+		}else{
+			globalSettings = JSON.parse(data)
 		}
+		$("body").removeClass("loading")
+		//mapInit()
+
+	}catch(err){
+		console.error(err)
+		$("body").html("<h1 id='settingsLoadError'>Парус!! Порвали парус!<br /><span>Проверь валидность settings.json</span><pre>"+err+"</pre></h1>")
 	}
+}).fail(function(err){
+	console.error(err)
+	if(typeof err == "object")err = JSON.stringify(err)
+	$("body").html("<h1 id='settingsLoadError'>Парус!! Порвали парус!<br /><span>Проверь доступность settings.json</span><pre>"+err+"</pre></h1>")
+	
+})
+
 let showError = function(text){
 	let err = $("<error><p>"+text+"</p><error>")
 	$("buttons>errors").append(err)
@@ -89,6 +89,55 @@ let showError = function(text){
 }
 
 let layer = L.layerGroup();
+
+let getGeozones = function(){
+	let gzSettings = globalSettings.colors.geozones
+	let magicEmpiricalNumber = 62661.2321733;
+	let msisdn = $("#geoMsisdn").val()
+	$("#geoMsisdn.error").removeClass("error")
+	if(!msisdn || msisdn == ""){
+		showError("Введите номер абонента геозон");
+		$("#geoMsisdn").addClass("error")
+		return
+	}
+	if(!new RegExp(/^\+7\(*\d{3}\)*\d{7}$/).test(msisdn)){
+		showError("Проверьте номер абонента геозон");
+		$("#geoMsisdn").addClass("error")
+		return
+	}
+
+	fetch("http://10.72.12.98/geo?msisdn="+msisdn).then(function(response){
+		if(response.status !== 200){
+			console.error(response);
+			showError("Ошибка загрузки геозон");
+			return
+		}
+		response.text().then(function(data) {  
+			if(data.length == 0){
+				console.error(response);
+				showError("Ошибка загрузки геозон");
+				return;
+			}
+
+			let geoArr = JSON.parse(data).map(gz => {
+				let text = "<b>Название: </b>"+gz.name
+				let bgColor = (gz.attrs && gz.attrs.color)? gz.attrs.color: gzSettings.defaultColor;
+				if(gz.poiArea.length){
+					return L.polygon(gz.poiArea, {color: gzSettings.border.color, weight:gzSettings.border.weight, fillColor: bgColor, fillOpacity: gzSettings.opacity}).bindTooltip(text, {className: 'myTooltip'});
+				}else{ //cirle
+					let radius =  Math.round(gz.poiCenter[2]*magicEmpiricalNumber)
+					text += "<br><b>Радиус:</b> "+ radius
+					return L.circle([gz.poiCenter[0], gz.poiCenter[1]],{radius: radius, color: gzSettings.border.color, weight:gzSettings.border.weight, fillColor: bgColor, fillOpacity: gzSettings.opacity}).bindTooltip(text, {className: 'myTooltip'});
+				}
+			}).filter(el => el);
+			L.featureGroup(geoArr).addTo(layer);
+	    })
+	}).catch(function(err){
+		console.error(err);
+		showError("Ошибка загрузки геозон");
+	})
+}
+
 let mapInit = function(){
 	var mbUrl = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
 
@@ -109,17 +158,20 @@ let mapInit = function(){
 	};
 
 
-
-
 	L.control.layers(baseLayers, {"layer": layer}).addTo(bigMap);
+	
 	bigMap.on('click', (e) => {
+		let settings = globalSettings.colors.fakeFootprints;
 		let msisdn = $("#msisdn").val()
+		$("#msisdn.error").removeClass("error")
 		if(!msisdn || msisdn == ""){
 			showError("Введите номер абонента");
+			$("#msisdn").addClass("error")
 			return
 		}
 		if(!new RegExp(/^\+7\(*\d{3}\)*\d{7}$/).test(msisdn)){
 			showError("Проверьте номер абонента");
+			$("#msisdn").addClass("error")
 			return
 		}
 		if(!selectedPosMethod){
@@ -143,6 +195,7 @@ let mapInit = function(){
 			}).join("&")
 		}
 
+		
 		fetch(url+genParamsString(data)).then(function(response){
 			temp.remove();
 			if(response.status != 200){
@@ -200,7 +253,11 @@ document.addEventListener("DOMContentLoaded", function() {
 <body>
 <div id='map'></div>
 <buttons>
-	<input id="msisdn" placeholder="Номер абонента" />
+	<div class='geo'>
+		<input id="geoMsisdn" placeholder="Абонент геозон" />
+		<button id="geoClear" title="Отобразить геозоны" onclick='getGeozones()'><img alt="Геозоны" src='./img/geozone.png'></button>
+	</div>
+	<input id="msisdn" placeholder="Абонент координат" />
 	<group>
 		<button id='first'>8192</button><button 
 		id='second'>4096</button><button 
@@ -208,7 +265,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	</group>
 
 
-	<button id="clear" title="Очистить" onclick='layer.clearLayers();'><icon></icon></button>
+	<button id="clear" title="Очистить" onclick='layer.clearLayers();'><img alt="Очистить карту" src="./img/eraser.png"></button>
 	<errors></errors>
 </buttons>
 </body>
