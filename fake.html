@@ -8,14 +8,18 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js" integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og==" crossorigin=""></script>
     <style>
-    	input.error{border: 2px solid red;}
+    	
+    	.error{border: 2px solid red;}
+
+    	input{outline-width: 0}
+    	
     	html, body {
 			height: 100%;
 			margin: 0;
 			font-family: Arial;
 			font-size: 18px
 		}
-		button{background: linear-gradient(to top, rgba(153,153,153,.3) 0%, rgba(255,255,255,.5) 100%);font-size:0.9em;}
+		button{background: linear-gradient(to top, rgba(153,153,153,.4) 0%, rgba(255,255,255,.6) 100%);font-size:0.9em;}
 		button:active{background: linear-gradient(to bottom, rgba(153,153,153,.3) 0%, rgba(255,255,255,.5) 100%)}
 		button.selected{background: linear-gradient(to bottom, rgba(153,153,153,.7) 0%, rgba(255,255,255,.9) 100%)}
 		button:focus {outline:0;}
@@ -32,8 +36,28 @@
 		buttons>errors>error>p{padding:10px 15px;margin:0px;}
 		buttons{display:block;position:absolute;right:10px;top:10px;z-index:1000;width:300px;}
 		buttons>group{display:block;margin: 5px 0px 10px}
-		buttons>group>*{width:33.33%;cursor: pointer;padding:10px 5px;}
+		buttons>group>button>{cursor: pointer;}
+		buttons>group>*{width:25%;height:30px;vertical-align: middle;display:inline-block;}
 		buttons>group>*.selected{}
+		buttons>group>radius{position: relative;}
+		buttons>group>radius>input{width:100%;height:100%;padding:0px 25px 0px 3px;}
+		buttons>group>radius>clear{
+			background: url(./img/eraser.png);
+		    display: none;
+		    position: absolute;
+		    right: 4px;
+		    top: 5px;
+		    width: 20px;
+		    background-size: contain;
+		    height: 20px;
+		    cursor: pointer;
+		    opacity: 0.6;
+		}
+		buttons>group>radius>clear:hover{
+			opacity: 0.9;
+		}
+
+		input[type=text]{box-sizing: border-box}
 
 		#msisdn, #geoMsisdn{padding:4px 2px;box-sizing: border-box;text-align:right;}
 		#msisdn{width:100%;}
@@ -180,11 +204,13 @@ let mapInit = function(){
 		}
 		let temp = L.circleMarker(e.latlng, {radius: settings.temp.radius, weight:1, fillColor: settings.temp.color, color:settings.temp.borderColor}).addTo(layer);
 		
+		let radius = (+$("radius>input").val())?+$("radius>input").val():settings.pos[selectedPosMethod].radius;
+console.log(radius)
 		let data = {
 			msisdn: msisdn,
 			time: new Date().toISOString(),
 			pos_method: selectedPosMethod,
-			radius: settings.pos[selectedPosMethod].radius,
+			radius: radius,
 			lat: e.latlng.lat,
 			lng: e.latlng.lng
 		}
@@ -205,7 +231,7 @@ let mapInit = function(){
 			}
 			
 			let pos_method = selectedPosMethod
-			let radius = settings.pos[pos_method].radius;
+			
 			L.circle(e.latlng, {
 				radius:radius, 
 				weight:settings.borderWeight, 
@@ -244,6 +270,23 @@ document.addEventListener("DOMContentLoaded", function() {
 		}
 		
 	})
+	// $("radius>input").focus(function(){
+	// 	$("buttons>group>*.selected").removeClass("selected");
+	// 	selectedPosMethod = undefined;
+	// })
+
+	$("radius>clear").click(function(event){
+		$("radius>input").val("")
+		selectedPosMethod = undefined;
+	})
+
+	$("radius>input").keyup(function(event,a,b){
+		if($("radius>input").val() != ""){
+			$("radius>clear").show();
+		}else{
+			$("radius>clear").hide();
+		}
+	})
 
 })
 
@@ -261,7 +304,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	<group>
 		<button id='first'>8192</button><button 
 		id='second'>4096</button><button 
-		id='third'>2</button>
+		id='third'>2</button><radius><input placeholder="Радиус" type="text" id='radius'><clear></clear></radius>
 	</group>
 
 
