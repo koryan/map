@@ -11,7 +11,7 @@
     	
     	.error{border: 2px solid red;}
 
-    	input{outline-width: 0}
+    	input{outline-width: 0;opacity: .6}
     	
     	html, body {
 			height: 100%;
@@ -19,9 +19,9 @@
 			font-family: Arial;
 			font-size: 18px
 		}
-		button{background: linear-gradient(to top, rgba(153,153,153,.4) 0%, rgba(255,255,255,.6) 100%);font-size:0.9em;}
-		button:active{background: linear-gradient(to bottom, rgba(153,153,153,.3) 0%, rgba(255,255,255,.5) 100%)}
-		button.selected{background: linear-gradient(to bottom, rgba(153,153,153,.7) 0%, rgba(255,255,255,.9) 100%)}
+		button{background: linear-gradient(to top, rgba(0,0,0,.2) 0%, rgba(255,255,255,.2) 100%);font-size:0.9em;}
+		button:active{background: linear-gradient(to bottom, rgba(0,0,0,.2) 0%, rgba(255,255,255,.2) 100%)}
+		button.selected{background: linear-gradient(to bottom, rgba(0,0,0,.2) 0%, rgba(255,255,255,.9) 100%)}
 		button:focus {outline:0;}
 		button::-moz-focus-inner {
 		  border: 0;
@@ -36,7 +36,7 @@
 		buttons>errors>error>p{padding:10px 15px;margin:0px;}
 		buttons{display:block;position:absolute;right:10px;top:10px;z-index:1000;width:300px;}
 		buttons>group{display:block;margin: 5px 0px 10px}
-		buttons>group>button>{cursor: pointer;}
+		buttons>group>button{cursor: pointer;}
 		buttons>group>*{width:25%;height:30px;vertical-align: middle;display:inline-block;}
 		buttons>group>*.selected{}
 		buttons>group>radius{position: relative;}
@@ -206,7 +206,6 @@ let mapInit = function(){
 		let temp = L.circleMarker(e.latlng, {radius: settings.temp.radius, weight:1, fillColor: settings.temp.color, color:settings.temp.borderColor}).addTo(layer);
 		
 		let radius = (+$("radius>input").val())?+$("radius>input").val():settings.pos[selectedPosMethod].radius;
-console.log(radius)
 		let data = {
 			msisdn: msisdn,
 			time: new Date().toISOString(),
