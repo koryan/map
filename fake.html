@@ -53,6 +53,7 @@
 		    cursor: pointer;
 		    opacity: 0.6;
 		}
+		buttons>group>radius>clear:active{top:6px;right:3px;}
 		buttons>group>radius>clear:hover{
 			opacity: 0.9;
 		}
@@ -277,7 +278,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 	$("radius>clear").click(function(event){
 		$("radius>input").val("")
-		selectedPosMethod = undefined;
+		$("radius>clear").hide()
 	})
 
 	$("radius>input").keyup(function(event,a,b){
