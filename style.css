@@ -13,13 +13,23 @@ body{
 	height: 100%;
 	
 }
+.leaflet-right{right:calc(25% + 40px);}
 #ui-datepicker-div{z-index:1000 !important;}
 #map.loading{background-color: lightgray}
 .myTooltip{
 	border-color: red;
 	border-radius: 10px	 
 }
-#controls{flex: 25%;padding:15px 20px;}
+#controls{
+	border-radius: 0px 0px 0px 30px;
+	position: absolute;
+    padding: 15px 20px;
+    top: 0px;
+    right: 0px;
+    width: 25%;
+    z-index: 10000;
+    background-color: white;
+    opacity: .7;}
 #controls table{width:100%;margin-bottom:20px;}
 #controls table>caption{text-align: left;font-weight:bold;margin-bottom:15px;font-size:110%;}
 
@@ -50,8 +60,8 @@ body{
 #controls table td.buttons button>*>*{vertical-align: middle}
 
 
-div#pointInfo{border:1px dashed gray;position:relative;padding:10px 5px 4px;font-size:90%;}
-div#pointInfo:before{content:"Информация по точке";background-color:white;position:absolute;font-size: 90%;top: -9px;left: 8px;}
+div#pointInfo{border-radius: 0px 0px 0px 10px;border:1px dashed gray;position:relative;padding:10px 5px 4px;font-size:90%;}
+div#pointInfo:before{padding: 0px 5px;content:"Информация по точке";background-color:white;position:absolute;font-size: 90%;top: -9px;left: 8px;}
 
 #msisdn{min-width:7.2em;}
 #msisdn.error{border-color:red;}
