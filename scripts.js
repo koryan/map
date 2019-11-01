@@ -431,11 +431,11 @@ function getData(type){
 	$('#msisdn.error').removeClass("error");
 	let msisdn = document.getElementById('msisdn').value
 	
-	if(!msisdn || msisdn == ""){
+	if(!msisdn || !new RegExp(/^\+?7\(*\d{3}\)*\d{7}$/).test(msisdn)){
 		$('#msisdn').addClass("error");
 		return;
 	}
-	
+	if(msisdn[0] != '+')msisdn = "+"+msisdn
 	
 	if (type == 'geozones'){
 		drawGeozones()

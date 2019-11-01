@@ -14,7 +14,7 @@ body{
 	
 }
 .leaflet-right{right:calc(25% + 40px);}
-#ui-datepicker-div{z-index:1000 !important;}
+#ui-datepicker-div{z-index:10000 !important;}
 #map.loading{background-color: lightgray}
 .myTooltip{
 	border-color: red;
@@ -23,13 +23,15 @@ body{
 #controls{
 	border-radius: 0px 0px 0px 30px;
 	position: absolute;
-    padding: 15px 20px;
+    padding: 20px;
     top: 0px;
     right: 0px;
     width: 25%;
     z-index: 10000;
     background-color: white;
-    opacity: .7;}
+    opacity: .8;
+	box-shadow: 0px 0px 10px 10px rgba(255, 255, 255, .8);
+}
 #controls table{width:100%;margin-bottom:20px;}
 #controls table>caption{text-align: left;font-weight:bold;margin-bottom:15px;font-size:110%;}
 
