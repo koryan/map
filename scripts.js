@@ -474,12 +474,21 @@ var mapInit = function(){
 	bigMap = L.map('map', {
 		center: [55.751244, 37.618423],
 		zoom: 12,
+		//measureControl: true,
 		layers: [grayscale, layers.cities, layers.csv, layers.markersLayer, layers.pointsLayer, layers.geozones, layers.cellsZones, layers.cells]
 	}).on('zoomend', function() {
     	onZoom();
 	});;
 
-	
+	L.control.measure({
+		position: 'topleft',
+		lineColor: globalSettings.colors.ruler.color,
+		lineWeight: globalSettings.colors.ruler.weight,
+		lineOpacity: globalSettings.colors.ruler.opacity
+
+	}).addTo(bigMap)
+
+	$(".leaflet-control-measure").attr("title", 'Рулетка\nM - начать измерение\nEsc - остановить имерение')
 	
 	var baseLayers = {
 		"Grayscale": grayscale,

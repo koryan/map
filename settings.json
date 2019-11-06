@@ -163,5 +163,10 @@
 			"borderColor":"green",
 			"radius":"10"
 		}
+	},
+	"ruler":{
+		"color": "red",
+		"weight": 2,
+		"opacity": 1
 	}	
 }}
