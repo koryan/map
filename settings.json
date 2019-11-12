@@ -40,18 +40,18 @@
 		"processed": {
 			"circle":{
 				"border":{
-					"color":"red",
+					"color":"brown",
 					"weight": 1
 				},
 				"background": "red",
-				"opacity": 0.3
+				"opacity": 0.05
 			},
 			"point":{
 				"border":{
-					"color":"red",
+					"color":"yellow",
 					"weight": 1
 				},
-				"background": "red",
+				"background": "black",
 				"opacity": 0.4
 			},
 			"track": {
@@ -165,8 +165,8 @@
 		}
 	},
 	"ruler":{
-		"color": "red",
-		"weight": 2,
+		"color": "green",
+		"weight": 3,
 		"opacity": 1
 	}	
 }}

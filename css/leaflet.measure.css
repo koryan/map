@@ -38,3 +38,6 @@
 .leaflet-measure-tooltip-difference {
 	color: #777;
 	}
+.leaflet-measure-tooltip-total{
+	font-size:120%;
+}
