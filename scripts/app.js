@@ -302,7 +302,7 @@ function getData(type){
 			return Object.keys(obj).map((i) => "<b>"+i+":</b> "+obj[i]).join("<br>");
 		}
 
-		for ( let i in data.inputValues){
+		for (let i in data.inputValues){
 			let currentMarker =  data.inputValues[i];
 
 			let coords = [currentMarker.inputs[0].v.latitude, currentMarker.inputs[0].v.longitude];
@@ -321,7 +321,7 @@ function getData(type){
 
 
 			
-
+			let info = [i, currentTime, radius]
 			let text = "<b>Радиус:</b> "+radius+"<br>"
 			let pointsListText = ""
 
@@ -336,6 +336,7 @@ function getData(type){
 			
 			if(type == "raw"){
 				let posMethod = currentMarker.inputs[0].v.pos_method;
+				info.push(posMethod);
 				colors[type].point.border.color = colors[type].point.borders[posMethod];
 				colors[type].point.background = colors[type].point.backgrounds[posMethod];
 			}
@@ -362,22 +363,24 @@ function getData(type){
 						fillOpacity: colors[type][e.target.options.type].opacity + .2,
 						weight: colors[type][e.target.options.type].border.weight + 2
 					})
-					$("li[textForPoint="+i+"]").addClass("hoverLike")
+					$("tr[textForPoint="+i+"]").addClass("hoverLike")
 				})
 				items[j].on('mouseout', function(e){
 					this.setStyle({
 						fillOpacity: colors[type][e.target.options.type].opacity,
 						weight: colors[type][e.target.options.type].border.weight
 					})
-					$("li[textForPoint="+i+"]").removeClass("hoverLike")
+					$("tr[textForPoint="+i+"]").removeClass("hoverLike")
 				})
 
 				items[j].addTo(((j == "circle")?layers.markersLayer:layers.pointsLayer))
 			}
 
+			
 			pointsList.push({
 				items: items,
-				text: "<tr textForPoint='"+i+"'><td>"+i+"</td><td>"+ currentTime +"</td><td>"+radius+"</td></tr>"
+				info: info,
+				//text: "<tr textForPoint='"+i+"'><td>"+ i +"</td><td>"+ currentTime +"</td><td>"+radius+"</td></tr>"
 			});
 			
 			
@@ -399,17 +402,22 @@ function getData(type){
 
 
 		$("#info").html(`
-			<table class='points'>
-				<caption>Всего: `+ pointsList.length +"</caption>"+
-				"<thead><tr><td>№</td><td>время</td><td>радиус</td></tr></thead>"+
+			<total>Всего: `+ pointsList.length +"</total>"+
+			"<scrollable><table class='points'>"+				
+				"<thead><tr><td>№</td><td>время</td><td>радиус</td>"+
+					((type == "raw")?"<td>pos метод</td>":"")+
+				"</tr></thead>"+
+
 				"<tbody>"+
-				pointsList.map((el) => el.text).join('')+
+				pointsList.map((el) => {
+					return "<tr textForPoint="+ el.info[0] +"><td>"+ el.info.join("</td><td>") + "</td></tr>"
+				}).join('')+
 				"</tbody>"+
-			"</table>")
-		$("#info>ul>li").on('click', function(e){
-			copyToClipboard($(this).find("span").html())
-		})
-		$("#info>ul>li").on('mouseenter', function(e){
+			"</table></scrollable>");
+		// $("#info>ul>li").on('click', function(e){
+		// 	copyToClipboard($(this).find("span").html())
+		// })
+		$("table.points tbody tr").on('mouseenter', function(e){
 			let id = $(this).attr("textForPoint")
 			for(var item of ['circle', 'point'])
 			{
@@ -419,7 +427,7 @@ function getData(type){
 				})
 			}
 		})
-		$("#info>ul>li").on('mouseleave', function(e){
+		$("table.points tbody tr").on('mouseleave', function(e){
 			let id = $(this).attr("textForPoint")
 			for(var item of ['circle', 'point'])
 			{

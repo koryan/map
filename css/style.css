@@ -37,7 +37,7 @@ body{
     max-height:100%;
 }
 #controls table.controls{width:100%;    border-spacing: 0px;}
-#controls table.controls>caption {
+#controls table>caption {
     text-align: left;
     font-weight: bold;
     margin-bottom: 15px;
@@ -70,7 +70,7 @@ body{
 #controls table.controls td.buttons button>*>*{vertical-align: middle}
 
 div#info{min-height: 0;display:flex;flex-direction:column;}
-
+div#info>*:nth-child(1){margin-top:10px;}
 
 
 
@@ -90,21 +90,28 @@ div#pointInfo:before{padding: 0px 5px;content:"Информация по точ�
 #settingsLoadError>span{font-size:30%;font-style:italic;font-weight:normal;}
 #settingsLoadError>pre{border: 1px dashed gray;font-size: 20%;font-weight: normal;display: block;margin: 0px 29%;overflow: auto;padding: 10px;}
 
-div#info>h4{margin: 0px 0px 4px;font-weight: bolder;font-size: 80%;}
+div#info>scrollable{min-height: 0;overflow: auto}
 div#info>ul{margin:0px;overflow: auto;margin-right:-20px;flex:1;min-height:0;padding:0px;}
 div#info>ul>li{list-style-type:none;font-size:85%;
 	cursor: url(./../img/toBuffer.png) 2 2, auto;
 	display:inline-block;}
 
-table.points{border-spacing: 0px;font-size:80%;margin-top: 10px}
-table.points>caption{font-size:100%;text-align:left;font-weight:bold;margin-bottom:5px;}
+table.points{border-spacing: 0px;font-size:80%;width:100%;}
+total{display:block;font-size:75%;text-align:left;font-weight:bold;margin-bottom:5px;}
 
-table.points tr>td{padding:2px 3px;text-align:right;};
-table.points tr>td:nth-child(1){font-style: italic;}
+table.points tr>td{padding:3px 4px;text-align:right;font-size:90%;color:gray;}
+table.points tbody tr>td:first-of-type{cursor:default;font-size:90%;color:darkgray;text-align:right}
+table.points tr>td:nth-child(2){padding-left:10px;}
 table.points tr>td{border:1px dotted lightgray;}
 table.points tr>td:first-of-type{border-left: none;}
 table.points tr:last-of-type>td{border-bottom: none;}
 table.points tr>td:last-of-type{border-right:none;}
 table.points>thead tr td{text-align:center;color:black;font-weight:bold;border-top:none;padding: 4px 3px;}
-table.points tbody tr>td:first-of-type{font-size:90%;font-style:italic;color:gray;text-align:right}
+
 table.points thead td:first-letter{text-transform: uppercase;}
+table.points thead tr>td:last-of-type{padding-left:5px;}
+
+table.points tbody tr:hover>td, table.points tbody tr.hoverLike>td{color:black;font-style:italic;border-color:black;border-style: dashed}
+table.points tbody tr:hover>td:first-of-type, table.points tbody tr.hoverLike>td:first-of-type{border-left:none;}
+table.points tbody tr:hover>td:last-of-type, table.points tbody tr.hoverLike>td:last-of-type{border-right:none;}
+table.points tbody tr:last-of-type:hover{border-bottom:none;}
