@@ -123,7 +123,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
 let drawCsv = function(csvData){
-	console.log(layers)
+	
 	//layers.csv.clear()
 	let csvToJson = function(csv){
 			let answer = [];
@@ -164,6 +164,7 @@ let drawCsv = function(csvData){
 	let circlesArr = [];
 	for(let i in data){
 		let zone = data[i];
+
 		if(!zone.color)zone.color = csvColors.defaultColor;
 		trackCoords.push([zone.lat, zone.lon])
 		var circle = L.circle([zone.lat, zone.lon],{radius: zone.radius, weight:0, fillColor: zone.color, fillOpacity: csvColors.opacity});
@@ -321,7 +322,7 @@ function getData(type){
 
 
 			
-			let info = [i, currentTime, radius]
+			let info = [coords[0], coords[1], currentTime, radius]
 			let text = "<b>Радиус:</b> "+radius+"<br>"
 			let pointsListText = ""
 
@@ -352,13 +353,11 @@ function getData(type){
 				items[j].bindTooltip(text, {className: 'myTooltip'})
 				
 
-				//console.log(j, )
 				items[j].on('click', function(e){
 					$("div#pointInfo").html(e.target.options.text)
 				})
 				items[j].on('mouseover', function(e){
 
-					//console.log(j,type, colors[type][j].opacity, colors[type][e.target.options.type].opacity + .2)
 					this.setStyle({
 						fillOpacity: colors[type][e.target.options.type].opacity + .2,
 						weight: colors[type][e.target.options.type].border.weight + 2
@@ -400,23 +399,40 @@ function getData(type){
 			//bigMap.fitBounds(circle.getBounds());
 		}
 
-
-		$("#info").html(`
-			<total>Всего: `+ pointsList.length +"</total>"+
+		let headerArr = ["№", "время", "радиус"]
+		if(type == "raw")headerArr.push("pos метод")
+		$("#info").html(
+			"<div class='totalWrapper'><total>Всего: "+ pointsList.length +"</total>"+
+			"<a class='downloadCsv' href='#'><img src='./img/csvDownload.png' /></a></div>"+
 			"<scrollable><table class='points'>"+				
-				"<thead><tr><td>№</td><td>время</td><td>радиус</td>"+
-					((type == "raw")?"<td>pos метод</td>":"")+
+				"<thead><tr>"+
+					headerArr.map((el) => "<td>"+el+"</td>").join("")+
 				"</tr></thead>"+
 
 				"<tbody>"+
-				pointsList.map((el) => {
-					return "<tr textForPoint="+ el.info[0] +"><td>"+ el.info.join("</td><td>") + "</td></tr>"
+				pointsList.map((el, index) => {
+					return "<tr textForPoint="+ index +"><td></td><td>"+ el.info.join("</td><td>") + "</td></tr>"
 				}).join('')+
 				"</tbody>"+
 			"</table></scrollable>");
 		// $("#info>ul>li").on('click', function(e){
 		// 	copyToClipboard($(this).find("span").html())
 		// })
+		$("#info .downloadCsv").on('click', function(e){
+			e.preventDefault();
+			let tmpHeaderArr = ["lat", "lon", "time", "radius"]
+			if(type == "raw")tmpHeaderArr.push("pos method")
+			let tHeader = "<thead><tr>"+
+					tmpHeaderArr.map((el) => "<td>"+el+"</td>").join("")+
+				"</tr></thead>"
+			$("#info").prepend("<table id='tmpForCsv'>"+tHeader+$("table.points tbody").html()+"</table>")
+			let fileName = msisdn+"_"+
+				moment(fromTime).format("DD.MM-HHmm")+"_"+
+				moment(tillTime).format("DD.MM-HHmm");
+			$("#tmpForCsv").table2csv("download", {filename: fileName+".csv", quoteFields: false})
+			$("#tmpForCsv").remove()
+		})
+
 		$("table.points tbody tr").on('mouseenter', function(e){
 			let id = $(this).attr("textForPoint")
 			for(var item of ['circle', 'point'])
@@ -494,7 +510,7 @@ function getData(type){
 	
 	doRequest(type, function(err, data){
 		if(err){
-			console.log(err, data)
+			s.error(err, data)
 			alert("Ошибка загрузки данных")	
 			return;
 		}

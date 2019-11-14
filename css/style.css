@@ -6,6 +6,7 @@ html, body {
 }
 body{
 	display:flex;
+	counter-reset: pointNum;
 }
 
 #map {
@@ -101,7 +102,9 @@ total{display:block;font-size:75%;text-align:left;font-weight:bold;margin-bottom
 
 table.points tr>td{padding:3px 4px;text-align:right;font-size:90%;color:gray;}
 table.points tbody tr>td:first-of-type{cursor:default;font-size:90%;color:darkgray;text-align:right}
-table.points tr>td:nth-child(2){padding-left:10px;}
+table.points tbody tr>td:nth-child(2){display:none;}
+table.points tbody tr>td:nth-child(3){display:none;}
+table.points tbody tr>td:nth-child(4){padding-left:10px;}
 table.points tr>td{border:1px dotted lightgray;}
 table.points tr>td:first-of-type{border-left: none;}
 table.points tr:last-of-type>td{border-bottom: none;}
@@ -114,4 +117,14 @@ table.points thead tr>td:last-of-type{padding-left:5px;}
 table.points tbody tr:hover>td, table.points tbody tr.hoverLike>td{color:black;font-style:italic;border-color:black;border-style: dashed}
 table.points tbody tr:hover>td:first-of-type, table.points tbody tr.hoverLike>td:first-of-type{border-left:none;}
 table.points tbody tr:hover>td:last-of-type, table.points tbody tr.hoverLike>td:last-of-type{border-right:none;}
-table.points tbody tr:last-of-type:hover{border-bottom:none;}
+table.points tbody tr:last-of-type:hover>td, table.points tbody tr:last-of-type.hoverLike>td{border-bottom:none;}
+
+table.points tbody tr>td:nth-child(1):before{
+	counter-increment: pointNum;
+	content: counter(pointNum);
+}
+
+.totalWrapper>*{display:inline-block;vertical-align:middle;}
+.totalWrapper>.downloadCsv>img{height:20px;margin-left: 20px}
+
+#tmpForCsv tbody tr>td:nth-child(1){display:none;}
