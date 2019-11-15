@@ -27,6 +27,7 @@
 <body>
 
 <div id='map' class='loading'></div><div id='controls'>
+	<form id='form'>
 	<table class='controls'>
 		<caption>Параметр<span id='putIvansNumber'>ы</span>
 		</caption>
@@ -50,15 +51,16 @@
 		</tr>
 		<tr>
 			<td colspan="2" class='buttons'>
-				<button id='raw'  title='Сырые данные'>
-					<smallLoader></smallLoader>
-					<noData title='Нет данных'></noData>
-					<span><img alt="Сырые данные" src='./img/raw.png'></span>
-				</button>
+				
 				<button id='processed' title='Обработанные данные'>
 					<smallLoader></smallLoader>
 					<noData title='Нет данных'></noData>
 					<span><img alt="Обработанные данные" src='./img/ai.png'></span>
+				</button>
+				<button id='raw'  title='Сырые данные'>
+					<smallLoader></smallLoader>
+					<noData title='Нет данных'></noData>
+					<span><img alt="Сырые данные" src='./img/raw.png'></span>
 				</button>
 				<button id='live' title='Акутальная геопозиция'>
 					<smallLoader></smallLoader>
@@ -94,6 +96,7 @@
 			</td>
 		</tr>
 	</table>
+	</form>
 	<div id='info'></div>
 	<div id='pointInfo'><i>Click on point to get it data</i></div>
 </div>
