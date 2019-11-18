@@ -334,7 +334,7 @@ function getData(type){
 			let pointsListText = ""
 
 			text+="<b>Был там:</b> "+usedCoords[""+coords].length + "<br>"
-			pointsListText+=usedCoords[""+coords].map(el => "<i>"+ el[1] +"</i>) "+ el[0]).join("<br />")+""
+			pointsListText+=usedCoords[""+coords].map(el => "<i>"+ (+el[1] + 1) +"</i>) "+ el[0]).join("<br />")+""
 			if (usedCoords[""+coords].length <= globalSettings.maxPointLengthInTooltip){
 				text += pointsListText;
 			}else{
