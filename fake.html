@@ -125,7 +125,7 @@ let getGeozones = function(){
 		$("#geoMsisdn").addClass("error")
 		return
 	}
-	if(!new RegExp(/^\+7\(*\d{3}\)*\d{7}$/).test(msisdn)){
+	if(!new RegExp(/^\+?7\(*\d{3}\)*\d{7}$/).test(msisdn)){
 		showError("Проверьте номер абонента геозон");
 		$("#geoMsisdn").addClass("error")
 		return

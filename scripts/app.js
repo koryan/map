@@ -101,6 +101,12 @@ document.addEventListener("DOMContentLoaded", function() {
 		$("#msisdn").val(defaultMsisdn);
 	})
 
+	$('#msisdn').on('keyup', function(event){
+		 if (event.keyCode === 13) {
+		 	 event.preventDefault();
+		 	 $('.buttons>#processed').click()
+		 }
+	})
 
 	$('.buttons>*').click(function(e){
 		let type = e.currentTarget.id
@@ -511,7 +517,7 @@ function getData(type){
 	
 	doRequest(type, function(err, data){
 		if(err){
-			s.error(err, data)
+			console.error(err, data)
 			alert("Ошибка загрузки данных")	
 			return;
 		}

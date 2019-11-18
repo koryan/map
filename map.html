@@ -27,7 +27,6 @@
 <body>
 
 <div id='map' class='loading'></div><div id='controls'>
-	<form id='form'>
 	<table class='controls'>
 		<caption>Параметр<span id='putIvansNumber'>ы</span>
 		</caption>
@@ -52,15 +51,16 @@
 		<tr>
 			<td colspan="2" class='buttons'>
 				
-				<button id='processed' title='Обработанные данные'>
-					<smallLoader></smallLoader>
-					<noData title='Нет данных'></noData>
-					<span><img alt="Обработанные данные" src='./img/ai.png'></span>
-				</button>
+				
 				<button id='raw'  title='Сырые данные'>
 					<smallLoader></smallLoader>
 					<noData title='Нет данных'></noData>
 					<span><img alt="Сырые данные" src='./img/raw.png'></span>
+				</button>
+				<button id='processed' title='Обработанные данные'>
+					<smallLoader></smallLoader>
+					<noData title='Нет данных'></noData>
+					<span><img alt="Обработанные данные" src='./img/ai.png'></span>
 				</button>
 				<button id='live' title='Акутальная геопозиция'>
 					<smallLoader></smallLoader>
@@ -83,7 +83,7 @@
 					<noData title='Нет данных'></noData>
 					<span><img alt="Вышки" src='./img/cellTower.png'></span>
 				</button><br />
-				<button class='csv' title='Загрузить CSV' ><label for='csv'><img alt="Загрузить CSV" src='./img/csv.png' /></label></button>
+				<button class='csv' id='labelForCsv' title='Загрузить CSV' ><label for='csv'><img alt="Загрузить CSV" src='./img/csv.png' /></label></button>
 				<button id='clear' title='Очистить карту'>
 					<img alt="Очистить карту" src="./img/eraser.png">
 				</button>
@@ -96,7 +96,6 @@
 			</td>
 		</tr>
 	</table>
-	</form>
 	<div id='info'></div>
 	<div id='pointInfo'><i>Click on point to get it data</i></div>
 </div>
