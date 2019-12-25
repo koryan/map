@@ -130,7 +130,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	$('.buttons>*').click(function(e){
 
 		let type = e.currentTarget.id
-		if(!!~['raw','processed', 'live', 'last', 'geozones', 'cellTowers'].indexOf(type)){
+		if(!!~['raw','processed', 'live', 'last', 'geozones', 'cellTowers', 'oneCellTower'].indexOf(type)){
 			getData(type)
 		}else if(!!~['clear'].indexOf(type)){
 			layers.clear()
@@ -142,6 +142,12 @@ document.addEventListener("DOMContentLoaded", function() {
 	if(window.location.protocol == "file:"){
 		$("#msisdn").val(defaultMsisdn);
 	}
+
+	$("input[id^=cellTower]").click(e => {
+		console.log()
+		e.preventDefault();
+		return false;
+	})
 
 });
 
@@ -189,6 +195,11 @@ function getData(type){
 					lona: bigMap.getBounds().getSouthEast().lng
 				}
 				uri += "cells?"+genParamsString(params);
+				break;
+			case 'oneCellTower':
+				uri = "http://10.40.94.91/"
+				params = oneCellTowerParams
+				uri += "poly?"+genParamsString(params);
 				break;
 			default: 
 				cb("Wrong data type");
@@ -424,6 +435,21 @@ function getData(type){
 		
 	}
 
+	let drawOneTower = function(data){
+		let gzSettings = globalSettings.colors.geozones		
+		let arr = data.map(el => {
+			console.log(el.coords)
+			return L.polygon(el.coords, {color:"green"})
+		}).filter(el => el);
+		console.log(arr)
+		var featureGroup = L.featureGroup(arr).addTo(layers.cellsZones);
+		bigMap.fitBounds(featureGroup.getBounds());
+
+
+		
+
+	}
+
 	let drawGeozones = function(data){
 		let magicEmpiricalNumber = 62661.2321733;
 		let gzSettings = globalSettings.colors.geozones		
@@ -464,18 +490,39 @@ function getData(type){
 
 	$("#"+type+">noData:visible").hide();	
 	$('#msisdn.error').removeClass("error");
+	$('#cellTowerLac.error').removeClass("error");
+	$('#cellTowerCell.error').removeClass("error");
 	
 	let msisdn = document.getElementById('msisdn').value
 	let fromTime = moment(document.getElementById('fromDate').value + ' ' + document.getElementById('fromTime').value+':59', 'DD.MM.YYYY HH:mm:ss').toISOString()
 	let tillTime = moment(document.getElementById('tillDate').value + ' ' + document.getElementById('tillTime').value+':59', 'DD.MM.YYYY HH:mm:ss').toISOString()
-
-	if(type != "cellTowers" && (!msisdn || !new RegExp(/^\+?7\(*\d{3}\)*\d{7}$/).test(msisdn))){
+	let oneCellTowerParams = {
+		lac: parseInt(document.getElementById('cellTowerLac').value),
+		cell: parseInt(document.getElementById('cellTowerCell').value)
+	}
+	if(type != "cellTowers" && type != "oneCellTower" && (!msisdn || !new RegExp(/^\+?7\(*\d{3}\)*\d{7}$/).test(msisdn))){
 		$('#msisdn').addClass("error");
 		showError('Введите номер абонента')
 		return;
 	}
+
+	
+	if(type == "oneCellTower"){
+		let emptyParams = Object.entries(oneCellTowerParams).filter(el => !el[1]).map(el => el[0])
+		if (emptyParams.length){
+			for(el of emptyParams){
+				let upperEl = el.charAt(0).toUpperCase() + el.slice(1)
+				
+				$('#cellTower'+upperEl).addClass("error");
+			}
+			showError('Введите '+emptyParams.join(' и ')+ ' вышки')
+			return;
+		}
+		//if(Object.entries(oneCellTowerParams))
+	}
 	if(msisdn[0] != '+')msisdn = "+"+msisdn
 	
+
 	
 	doRequest(type, function(err, data){
 		if(err){
@@ -488,6 +535,8 @@ function getData(type){
 			drawGeozones(data)
 		}else if(type == 'cellTowers'){
 			drawTowers(data)
+		}else if(type == 'oneCellTower'){
+			drawOneTower(data)
 		}else{			
 			drawPoints(type, data)
 		}		

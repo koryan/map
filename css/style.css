@@ -56,11 +56,13 @@ body{
 #controls table.controls td.buttons{padding-top:15px;}
 #controls table.controls td.buttons>button[disabled]{cursor:not-allowed;opacity: .4}
 #controls table.controls td.buttons>button.loading{cursor:wait;}
-#controls table.controls td.buttons>button{height:42px;min-width:5.2em;display:inline-block;vertical-align: middle;margin-bottom: 4px;font-size:1em;padding: 5px 20px;position:relative;white-space: nowrap;cursor:pointer;}
+#controls table.controls td.buttons>*:not([type=file]){height:42px;min-width:5.2em;display:inline-block;vertical-align: middle;margin-bottom: 4px;font-size:1em;padding: 5px 20px;position:relative;white-space: nowrap;cursor:pointer;}
 #controls table.controls td.buttons>button>noData{cursor:help;display:none;width:16px;height:16px;background-size: contain;background-image: url(./../img/cancel.png)}
 #controls table.controls td.buttons>button>smallLoader{position:absolute;top: .5em;left: calc(50% - 8px);display:none;width:16px;height:16px;background-image: url(./../img/smallLoader.gif)}
 #controls table.controls td.buttons>#csv{width:0px;padding:0px;}
-#controls table.controls td.buttons>#cellTowers{width:0px;padding:0px;}
+#controls table.controls td.buttons>#cellTowers{padding:0px;}
+#controls table.controls td.buttons>#oneCellTower{min-width:10.65em;padding:0px;}
+#controls table.controls td.buttons>#oneCellTower>input{font-size:80%;width:70px;margin-top:3px;}
 
 #controls table.controls td.buttons button img{width:1.5em;height:1.5em;}
 #controls table.controls td.buttons button.csv{padding:0px}
@@ -83,7 +85,7 @@ div#pointInfo{display:none;border-radius: 0px 0px 0px 10px;border:1px dashed gra
 div#pointInfo:before{padding: 0px 5px;content:"Информация по точке";background-color:white;position:absolute;font-size: 90%;top: -9px;left: 8px;}
 
 #msisdn{min-width:7.2em;}
-#msisdn.error{border-color:red;}
+#msisdn.error, input[id^=cellTower].error{border-color:red;}
 
 #putIvansNumber{cursor:default;}
 
