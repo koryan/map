@@ -25,6 +25,18 @@ let copyToClipboard = function(text) {
     $temp.remove();
 }
 
+let showFail = function(failTxt, comment){
+	$("body").html("<h1 id='settingsLoadError'>Парус!! Порвали парус!<br />"+ ((comment)?"<span>"+comment+"</span>":"") +"<pre>"+failTxt+"</pre></h1>")
+}
+
+let showError = function(text){
+	let err = $("<error><p>"+text+"</p><error>")
+	$("#errors").append(err)
+	err.addClass("on")
+	setTimeout(() => {
+		err.remove()
+	}, 1500)
+}
 
 var bigMap = undefined;
 var globalSettings = undefined;
@@ -33,24 +45,31 @@ var globalSettings = undefined;
 
 //get settings
 $.get("./settings.json").done(function(data){
-	try{
-		if(typeof data == "object"){
-			globalSettings  = data
-		}else{
-			globalSettings = JSON.parse(data)
-		}
-		$("body").removeClass("loading")
-		mapInit()
 
+	if(typeof data == "object"){
+		globalSettings  = data
+	}else{
+		try{
+			globalSettings = JSON.parse(data)
+		}catch(err){
+			console.error(err)
+			showFail(err, "Проверь валидность settings.js");		
+			return;
+		}
+	}
+	$("body").removeClass("loading")
+	
+	try{
+		mapInit()
 	}catch(err){
 		console.error(err)
-		$("body").html("<h1 id='settingsLoadError'>Парус!! Порвали парус!<br /><span>Проверь валидность settings.json</span><pre>"+err+"</pre></h1>")
+		showFail(err, "Сломалась карта")
 	}
+
 }).fail(function(err){
 	console.error(err)
 	if(typeof err == "object")err = JSON.stringify(err)
-	$("body").html("<h1 id='settingsLoadError'>Парус!! Порвали парус!<br /><span>Проверь доступность settings.json</span><pre>"+err+"</pre></h1>")
-	
+	showFail(err, "Проверь доступность settings.js")	
 })
 
 
@@ -109,6 +128,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	})
 
 	$('.buttons>*').click(function(e){
+
 		let type = e.currentTarget.id
 		if(!!~['raw','processed', 'live', 'last', 'geozones', 'cellTowers'].indexOf(type)){
 			getData(type)
@@ -128,66 +148,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
 
-
-let drawCsv = function(csvData){
-	
-	//layers.csv.clear()
-	let csvToJson = function(csv){
-			let answer = [];
-			let objKeys = [];
-			let lines = csv.split('\n');
-		    for(let i = 0; i < lines.length; i++){
-		    	if (lines[i] == "")continue;
-		    	let colomns = lines[i].split(',') 
-		    	let obj = {};
-		    	for(let j = 0; j < colomns.length; j++){
-		      		let val = colomns[j];
-		      		
-		      		if (i == 0){ 
-						objKeys.push(val.trim());
-		      		}else{
-		      			obj[objKeys[j]] = val;
-		      		}
-		  		}
-		  		if(i != 0)answer.push(obj);
-		    }
-
-		    return answer;
-		}
-
-	let data = csvToJson(csvData).map(el => {
-		let obj = {};
-		obj.lon = +el.lon;
-		obj.lat = +el.lat;
-		obj.radius = +el.radius;
-		obj.text = el.text;
-		obj.color = el.color;	
-		return obj;
-	})
-
-	
-	let csvColors = globalSettings.colors.csv; //from colors.json
-	let trackCoords = [];
-	let circlesArr = [];
-	for(let i in data){
-		let zone = data[i];
-
-		if(!zone.color)zone.color = csvColors.defaultColor;
-		trackCoords.push([zone.lat, zone.lon])
-		var circle = L.circle([zone.lat, zone.lon],{radius: zone.radius, weight:0, fillColor: zone.color, fillOpacity: csvColors.opacity});
-		circle.bindTooltip(zone.text, {className: 'myTooltip'})
-		circlesArr.push(circle);
-		
-	}
-	var featureGroup = L.featureGroup(circlesArr).addTo(layers.markersLayer);
-	L.polyline(trackCoords, {color: csvColors.track.color, weight:csvColors.track.weight}).addTo(layers.csv);
-	
-	bigMap.fitBounds(featureGroup.getBounds());
-	
-}
-
 function getData(type){
-	
 	let doRequest = function(type, cb){
 		let uri = "http://10.72.12.98/";
 		let params = {};
@@ -510,6 +471,7 @@ function getData(type){
 
 	if(!msisdn || !new RegExp(/^\+?7\(*\d{3}\)*\d{7}$/).test(msisdn)){
 		$('#msisdn').addClass("error");
+		showError('Введите номер абонента')
 		return;
 	}
 	if(msisdn[0] != '+')msisdn = "+"+msisdn
@@ -518,7 +480,8 @@ function getData(type){
 	doRequest(type, function(err, data){
 		if(err){
 			console.error(err, data)
-			alert("Ошибка загрузки данных")	
+	
+			showError("Ошибка загрузки данных")	
 			return;
 		}
 		if (type == 'geozones'){
@@ -529,13 +492,7 @@ function getData(type){
 			drawPoints(type, data)
 		}		
 	})
-
-	
-	
-	
 }
-
-
 
 var mapInit = function(){
 	var mbUrl = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
@@ -560,7 +517,6 @@ var mapInit = function(){
 	}).on('zoomend', function() {
     	onZoom();
 	});;
-
 	L.control.measure({
 		position: 'topleft',
 		lineColor: globalSettings.colors.ruler.color,
@@ -590,13 +546,62 @@ var mapInit = function(){
 	onZoom();
 }
 
+let drawCsv = function(csvData){
+	let csvToJson = function(csv){
+		let answer = [];
+		let objKeys = [];
+		let lines = csv.split('\n');
+		for(let i = 0; i < lines.length; i++){
+			if (lines[i] == "")continue;
+			let colomns = lines[i].split(',') 
+			let obj = {};
+			for(let j = 0; j < colomns.length; j++){
+				let val = colomns[j];
+				
+				if (i == 0){ 
+					objKeys.push(val.trim());
+				}else{
+					obj[objKeys[j]] = val;
+				}
+			}
+			if (i != 0){ answer.push(obj); }
+		}
+	    return answer;
+	}
+
+	let data = csvToJson(csvData).map(el => {
+		let obj = {};
+		obj.lon = +el.lon;
+		obj.lat = +el.lat;
+		obj.radius = +el.radius;
+		obj.text = el.text;
+		obj.color = el.color;	
+		return obj;
+	})
+	
+	let csvColors = globalSettings.colors.csv; //from settings.json
+	let trackCoords = [];
+	let circlesArr = [];
+	for (let i in data){
+		let zone = data[i];
+
+		if (!zone.color){ zone.color = csvColors.defaultColor; }
+		trackCoords.push([zone.lat, zone.lon])
+		var circle = L.circle([zone.lat, zone.lon],{radius: zone.radius, weight:0, fillColor: zone.color, fillOpacity: csvColors.opacity});
+		circle.bindTooltip(zone.text, {className: 'myTooltip'})
+		circlesArr.push(circle);
+	}
+	var featureGroup = L.featureGroup(circlesArr).addTo(layers.markersLayer);
+	L.polyline(trackCoords, {color: csvColors.track.color, weight:csvColors.track.weight}).addTo(layers.csv);
+	
+	bigMap.fitBounds(featureGroup.getBounds());
+}
 
 let openCsv = function(e){
 	var input = e.target;
 
     var reader = new FileReader();
     reader.onload = function(){
-		//let result = reader.result;
 		drawCsv(reader.result)
     };
     reader.readAsText(input.files[0]);
