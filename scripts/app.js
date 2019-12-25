@@ -469,7 +469,7 @@ function getData(type){
 	let fromTime = moment(document.getElementById('fromDate').value + ' ' + document.getElementById('fromTime').value+':59', 'DD.MM.YYYY HH:mm:ss').toISOString()
 	let tillTime = moment(document.getElementById('tillDate').value + ' ' + document.getElementById('tillTime').value+':59', 'DD.MM.YYYY HH:mm:ss').toISOString()
 
-	if(!msisdn || !new RegExp(/^\+?7\(*\d{3}\)*\d{7}$/).test(msisdn)){
+	if(type != "cellTowers" && (!msisdn || !new RegExp(/^\+?7\(*\d{3}\)*\d{7}$/).test(msisdn))){
 		$('#msisdn').addClass("error");
 		showError('Введите номер абонента')
 		return;

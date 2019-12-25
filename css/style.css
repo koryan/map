@@ -129,3 +129,8 @@ table.points tbody tr>td:nth-child(1):before{
 .totalWrapper>.downloadCsv>img{height:20px;margin-left: 20px}
 
 #tmpForCsv tbody tr>td:nth-child(1){display:none;}
+
+#errors{position:absolute;bottom:10px;right:10px;z-index:10000;}
+#errors>error{background-color:red;display: block;padding:20px;color:white;}
+#errors>error:not(:last-of-type){margin-bottom:10px;}
+#errors>error>p{padding:0px;margin:0px;}
