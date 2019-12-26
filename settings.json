@@ -123,24 +123,33 @@
 	},
 
 	"oneCell":{
-		"point":{
+		"tower":{
 			"border":{
-				"color":"green",
+				"color":"blue",
 				"weight": 1
 			},
-			"background": "cyan",
-			"opacity": 0.1,
+			"background": "navy",
+			"opacity": 0.6,
 			"radius": 5
 			
 		},
 		"poly": {
 			"border": {
-				"color":"lime",
+				"color":"green",
 				"weight": 1
 			},
-			"background": "blue",
-			"opacity": 0.1
+			"background": "lime",
+			"opacity": 0.1,
+			"outerCircle":{
+				"border": {
+					"color":"green",
+					"weight": 1
+				},
+				"centerPointColor": "red"
+			}
 		}
+
+
 	},
 
 	"csv": {

@@ -8,9 +8,10 @@ let overlaysArr = [
 	["csv", "Трек"],
 	["geozones", "Геозоны"],
 	["cells", "Вышки"],
-	["cellsZones", "Вышки c радиусом"],
-	["oneCell", "oneCell"],
+	//["cellsZones", "Вышки c радиусом"],
+	// ["oneCell", "oneCell"],
 	["oneCellPoly", "oneCellPoly"],
+	["oneCellPolyWCircles", "oneCellPolyWCircles"],
 ]
 
 var layers = {	
@@ -74,10 +75,11 @@ $.get("./settings.json").done(function(data){
 		showFail(err, "Сломалась карта")
 	}
 
-}).fail(function(err){
-	console.error(err)
+}).fail(function(err, text){
+	
+	console.error(text, err)
 	if(typeof err == "object")err = JSON.stringify(err)
-	showFail(err, "Проверь доступность settings.js")	
+	showFail(err, text)	
 })
 
 
@@ -451,17 +453,28 @@ function getData(type){
 
 	let drawOneTower = function(data){
 
-		let oneTowerSettings = globalSettings.colors.oneCell		
-		let arr = data.poly.map(el => {
-			return L.polygon(el.coords, {color: oneTowerSettings.poly.border.color, weight:oneTowerSettings.poly.border.weight, fillColor: oneTowerSettings.poly.background, fillOpacity: oneTowerSettings.poly.opacity}).bindTooltip("id: "+el.id, {className: 'myTooltip'});
-		}).filter(el => el);
-		console.log(arr)
-		var featureGroup = L.featureGroup(arr).addTo(layers.oneCellPoly);
+		let oneTowerSettings = globalSettings.colors.oneCell	
+		let polyArr = [];
+		let polyCirclesArr = [];	
+		console.log("oneTowerSettings.poly.outerCricle", oneTowerSettings.poly.outerCircle)
+		for(var el of data.poly){
+			polyArr.push(		L.polygon	(el.coords, {color: oneTowerSettings.poly.border.color, weight:oneTowerSettings.poly.border.weight, fillColor: oneTowerSettings.poly.background, fillOpacity: oneTowerSettings.poly.opacity}).bindTooltip("id: "+el.id, {className: 'myTooltip'}));
+			
+			polyCirclesArr.push(L.circle	(el.center, {radius: el.radius, color: oneTowerSettings.poly.outerCircle.border.color, weight:oneTowerSettings.poly.outerCircle.border.weight}))
+			polyCirclesArr.push(L.circleMarker(el.center,{radius: 3,    weight: 1,  color: oneTowerSettings.poly.outerCircle.centerPointColor, fillColor: oneTowerSettings.poly.outerCircle.centerPointColor, fillOpacity: 1}))
+		
+			
+		}
+		
+
+		var featureGroup = L.featureGroup(polyArr).addTo(layers.oneCellPoly);
 		bigMap.fitBounds(featureGroup.getBounds());
-		text = "zzz"
 
+		L.featureGroup(polyCirclesArr).addTo(layers.oneCellPolyWCircles);
+		
 
-		var t = L.featureGroup([L.circleMarker(data.tower,{text:text, radius: oneTowerSettings.point.radius,     weight: oneTowerSettings.point.border.weight,  color: oneTowerSettings.point.border.color, fillColor: oneTowerSettings.point.background, fillOpacity: oneTowerSettings.point.opacity}).bindTooltip(text, {className: 'myTooltip'})]).addTo(layers.oneCellPoly);
+		text = "<b>Lac:</b> "+oneCellTowerParams.lac+"<br /><b>Cell:</b> "+oneCellTowerParams.cell
+		L.circleMarker(data.tower,{text:text, radius: oneTowerSettings.tower.radius,     weight: oneTowerSettings.tower.border.weight,  color: oneTowerSettings.tower.border.color, fillColor: oneTowerSettings.tower.background, fillOpacity: oneTowerSettings.tower.opacity}).bindTooltip(text, {className: 'myTooltip'}).addTo(layers.oneCellPoly);
 
 		//bigMap.fitBounds(t.getBounds());
 
@@ -497,13 +510,19 @@ function getData(type){
 		
 		for(i in data){
 			let cell = data[i];
-			let text = createText({id:cell.id,radius: cell.max_radius, lac: cell.lac})
+			let text = createText({id:cell.cell_id,radius: cell.max_radius, lac: cell.lac})
 
 			radiusesArr.push(L.circle([cell.lat, cell.lon],{radius: cell.max_radius, color: cellSettings.circle.border.color, weight:cellSettings.circle.border.weight, fillColor: cellSettings.circle.background, fillOpacity: cellSettings.circle.opacity}).bindTooltip(text, {className: 'myTooltip'}))
-			towersArr.push(L.circleMarker([cell.lat, cell.lon],{text:text, radius: cellSettings.point.radius,     weight: cellSettings.point.border.weight,  color: cellSettings.point.border.color, fillColor: cellSettings.point.background, fillOpacity: cellSettings.point.opacity}).bindTooltip(text, {className: 'myTooltip'}))
+			let t = L.circleMarker([cell.lat, cell.lon],{params: {lac: cell.lac, cell: cell.cell_id}, text:text, radius: cellSettings.point.radius,     weight: cellSettings.point.border.weight,  color: cellSettings.point.border.color, fillColor: cellSettings.point.background, fillOpacity: cellSettings.point.opacity}).bindTooltip(text, {className: 'myTooltip'})
+			t.on('click', function(e){
+					
+					$("#cellTowerCell").val(e.target.options.params.cell)
+					$("#cellTowerLac").val(e.target.options.params.lac)
+				});
+			towersArr.push(t)
 		}
-		L.featureGroup(radiusesArr).addTo(layers.cellsZones);
-		L.featureGroup(towersArr).addTo(layers.cells);
+		//L.featureGroup(radiusesArr).addTo(layers.cellsZones);
+		L.featureGroup(towersArr).addTo(layers.cells)
 	}
 
 	$("#"+type+">noData:visible").hide();	
