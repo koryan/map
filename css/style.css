@@ -87,7 +87,7 @@ div#pointInfo:before{padding: 0px 5px;content:"Информация по точ�
 #msisdn{min-width:7.2em;}
 #msisdn.error, input[id^=cellTower].error{border-color:red;}
 
-#putIvansNumber{cursor:default;}
+#putIvansNumber, #putTestCellData{cursor:default;}
 
 
 #settingsLoadError{margin-top: 30%;   text-align: center;    width: 100%;font-size:400%;}

@@ -99,6 +99,7 @@
 				"opacity": 0.5
 			}
 		},
+
 		"live":{
 			"circle":{
 				"border":{
@@ -118,6 +119,27 @@
 				"color":"red",
 				"weight":1
 			}
+		}
+	},
+
+	"oneCell":{
+		"point":{
+			"border":{
+				"color":"green",
+				"weight": 1
+			},
+			"background": "cyan",
+			"opacity": 0.1,
+			"radius": 5
+			
+		},
+		"poly": {
+			"border": {
+				"color":"lime",
+				"weight": 1
+			},
+			"background": "blue",
+			"opacity": 0.1
 		}
 	},
 

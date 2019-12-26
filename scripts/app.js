@@ -1,15 +1,19 @@
 
-let defaultMsisdn = "+79152103911"
+let defaultMsisdn = "+79152103911";
+let defaultCell = {cell: 41202, lac: 580};
 
+let overlaysArr = [
+	["markersLayer", "Радиусы"],
+	["pointsLayer", "Точки"],
+	["csv", "Трек"],
+	["geozones", "Геозоны"],
+	["cells", "Вышки"],
+	["cellsZones", "Вышки c радиусом"],
+	["oneCell", "oneCell"],
+	["oneCellPoly", "oneCellPoly"],
+]
 
-var layers = {
-	markersLayer: L.layerGroup(),
-	pointsLayer: L.layerGroup(),
-	cities: L.layerGroup(),
-	csv: L.layerGroup(),
-	geozones: L.layerGroup(),
-	cells: L.layerGroup(),
-	cellsZones: L.layerGroup(),
+var layers = {	
 	clear: function(){
 		for(var i in this){
 			if(i != "clear")this[i].clearLayers();
@@ -17,6 +21,10 @@ var layers = {
 		$("div.pointInfo").html("<i>Click on point to get it data</i>")
 	}
 }
+for(var overlay of overlaysArr){
+	layers[overlay[0]] = L.layerGroup()
+}
+
 let copyToClipboard = function(text) {
     var $temp = $("<input>");
     $("body").append($temp);
@@ -119,6 +127,12 @@ document.addEventListener("DOMContentLoaded", function() {
 	$('#putIvansNumber').click(function(){
 		$("#msisdn").val(defaultMsisdn);
 	})
+
+	$('#putTestCellData').click(function(){
+		$("#cellTowerCell").val(defaultCell.cell);
+		$("#cellTowerLac").val(defaultCell.lac);
+	})
+	
 
 	$('#msisdn').on('keyup', function(event){
 		 if (event.keyCode === 13) {
@@ -436,17 +450,21 @@ function getData(type){
 	}
 
 	let drawOneTower = function(data){
-		let gzSettings = globalSettings.colors.geozones		
-		let arr = data.map(el => {
-			console.log(el.coords)
-			return L.polygon(el.coords, {color:"green"})
+
+		let oneTowerSettings = globalSettings.colors.oneCell		
+		let arr = data.poly.map(el => {
+			return L.polygon(el.coords, {color: oneTowerSettings.poly.border.color, weight:oneTowerSettings.poly.border.weight, fillColor: oneTowerSettings.poly.background, fillOpacity: oneTowerSettings.poly.opacity}).bindTooltip("id: "+el.id, {className: 'myTooltip'});
 		}).filter(el => el);
 		console.log(arr)
-		var featureGroup = L.featureGroup(arr).addTo(layers.cellsZones);
+		var featureGroup = L.featureGroup(arr).addTo(layers.oneCellPoly);
 		bigMap.fitBounds(featureGroup.getBounds());
+		text = "zzz"
 
 
-		
+		var t = L.featureGroup([L.circleMarker(data.tower,{text:text, radius: oneTowerSettings.point.radius,     weight: oneTowerSettings.point.border.weight,  color: oneTowerSettings.point.border.color, fillColor: oneTowerSettings.point.background, fillOpacity: oneTowerSettings.point.opacity}).bindTooltip(text, {className: 'myTooltip'})]).addTo(layers.oneCellPoly);
+
+		//bigMap.fitBounds(t.getBounds());
+
 
 	}
 
@@ -561,8 +579,7 @@ var mapInit = function(){
 	bigMap = L.map('map', {
 		center: [55.751244, 37.618423],
 		zoom: 12,
-		//measureControl: true,
-		layers: [grayscale, layers.cities, layers.csv, layers.markersLayer, layers.pointsLayer, layers.geozones, layers.cellsZones, layers.cells]
+		layers: [grayscale].concat(overlaysArr.map(el => layers[el[0]]))
 	}).on('zoomend', function() {
     	onZoom();
 	});;
@@ -580,16 +597,11 @@ var mapInit = function(){
 		"Grayscale": grayscale,
 		"Streets": streets
 	};
+	var overlays = {};
 
-	var overlays = {
-		"Трек": layers.csv,
-		"Радиусы": layers.markersLayer,
-		"Точки": layers.pointsLayer,
-		"Геозоны": layers.geozones,
-		"Вышки": layers.cells,
-		"Вышки c зоной": layers.cellsZones
-	};
-
+	for(tOverlay of overlaysArr){
+		overlays[tOverlay[1]] = layers[tOverlay[0]]
+	}
 	L.control.layers(baseLayers, overlays).addTo(bigMap);
 
 	onZoom();
