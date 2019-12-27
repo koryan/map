@@ -265,17 +265,19 @@ function getData(type){
 			data.inputValues = data.inputs;
 			delete data.inputs;
 
-			if(!data.inputValues[0].value){
+			if(!data.inputValues[0]){
+				console.log("1111111")
+				console.log(data.inputValues[0])
 				$("#live>noData").css("display","inline-block");
 				return;
 			}
-			data.inputValues = data.inputValues.map(el => {
-				el.v = el.value;
-				el.i = el.input;
-				delete el.value;
-				delete el.input;
-				return el;
-			})
+			// data.inputValues = data.inputValues.map(el => {
+			// 	el.v = el.value;
+			// 	el.i = el.input;
+			// 	delete el.value;
+			// 	delete el.input;
+			// 	return el;
+			// })
 
 			data.inputValues = [{inputs: data.inputValues}]
 		}
