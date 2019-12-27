@@ -172,7 +172,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 function getData(type){
 	let doRequest = function(type, cb){
-		let uri = "http://10.72.12.98/";
+		let uri = "/api/";
 		let params = {};
 		let genParamsString = function(params){
 			return Object.keys(params).map(el => {
@@ -213,7 +213,6 @@ function getData(type){
 				uri += "cells?"+genParamsString(params);
 				break;
 			case 'oneCellTower':
-				uri = "http://10.40.94.91/"
 				params = oneCellTowerParams
 				uri += "poly?"+genParamsString(params);
 				break;
