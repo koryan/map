@@ -237,14 +237,16 @@ function getData(type){
 		loader.set();
 		fetch(uri).then(function(response){
 
-			loader.clear();
+			
 
 			if(response.status !== 200){
+				loader.clear();
 				cb(response.status, response)
 				return;
 			}
 			
 			response.text().then(function(data) {  
+				loader.clear();
 				if(data.length == 0){
 					cb(false, [])
 					return;
@@ -266,19 +268,10 @@ function getData(type){
 			delete data.inputs;
 
 			if(!data.inputValues[0]){
-				console.log("1111111")
-				console.log(data.inputValues[0])
 				$("#live>noData").css("display","inline-block");
 				return;
 			}
-			// data.inputValues = data.inputValues.map(el => {
-			// 	el.v = el.value;
-			// 	el.i = el.input;
-			// 	delete el.value;
-			// 	delete el.input;
-			// 	return el;
-			// })
-
+	
 			data.inputValues = [{inputs: data.inputValues}]
 		}
 
@@ -386,7 +379,7 @@ function getData(type){
 		}
 		
 		var polyline = L.polyline(lineCoords, {color: colors[type].track.color, weight:colors[type].track.weight}).addTo(layers.csv);
-
+console.log("lineCoords", lineCoords)
 		//check if we're loading tracks and fit to track or to point
 		let check = (!!~["live", 'last'].indexOf(type));
 		if (!check){
@@ -442,12 +435,12 @@ function getData(type){
 		$("table.points tbody tr").on('mouseleave', function(e){
 			let id = $(this).attr("textForPoint")
 			for(var item of ['circle', 'point'])
-			{
+			{	 
 				pointsList[id].items[item].setStyle({
 					fillOpacity: colors[type][item].opacity,
 					weight: colors[type][item].border.weight
 				})
-			}		
+			}	
 		})
 		
 	}
@@ -469,7 +462,7 @@ function getData(type){
 		
 
 		var featureGroup = L.featureGroup(polyArr).addTo(layers.oneCellPoly);
-		bigMap.fitBounds(featureGroup.getBounds());
+		//bigMap.fitBounds(featureGroup.getBounds());
 
 		L.featureGroup(polyCirclesArr).addTo(layers.oneCellPolyWCircles);
 		
@@ -477,8 +470,9 @@ function getData(type){
 		text = "<b>Lac:</b> "+oneCellTowerParams.lac+"<br /><b>Cell:</b> "+oneCellTowerParams.cell
 		L.circleMarker(data.tower,{text:text, radius: oneTowerSettings.tower.radius,     weight: oneTowerSettings.tower.border.weight,  color: oneTowerSettings.tower.border.color, fillColor: oneTowerSettings.tower.background, fillOpacity: oneTowerSettings.tower.opacity}).bindTooltip(text, {className: 'myTooltip'}).addTo(layers.oneCellPoly);
 
-		//bigMap.fitBounds(t.getBounds());
+console.log([data.tower, data.coords_end])
 
+		L.polyline([data.tower, data.coords_end], {color: oneTowerSettings.azimut.color, weight:oneTowerSettings.azimut.weight}).addTo(layers.oneCellPoly);
 
 	}
 
@@ -501,29 +495,40 @@ function getData(type){
 	}
 
 	let drawTowers = function(data){
-		let towersArr = [];
-		let radiusesArr = [];
 		let cellSettings = globalSettings.colors.points.towerCells; 
 		let createText = function(obj){
 			
 			return Object.keys(obj).map((i) => "<b>"+i+":</b> "+obj[i]).join("<br>");
 		}		
 		
-		for(i in data){
-			let cell = data[i];
-			let text = createText({id:cell.cell_id,radius: cell.max_radius, lac: cell.lac})
+		let markersArr = data.map(cellGroup => {
+			let text = createText({cellNum: cellGroup.cell_data.length})
+			let tMarker = L.circleMarker(cellGroup.coords,{params: {}, text:text, radius: cellSettings.point.radius,     weight: cellSettings.point.border.weight,  color: cellSettings.point.border.color, fillColor: cellSettings.point.background, fillOpacity: cellSettings.point.opacity}).bindTooltip(text, {className: 'myTooltip'})
+			tMarker.on('click', function(e){
+					let cellsHtml = "<scrollable><table class='cells points'><thead><tr><td>№</td><td>Cell</td><td>Lac</td><td>Azimut</td><td>Height</td></tr></thead><tbody>"+
+						cellGroup.cell_data.map(cell => {
+						return "<tr><td></td><td>"+ cell.cell +"</td><td>"+ cell.lac +"</td><td>"+ cell.azimut +"</td><td>"+ cell.height +"</td></tr>"
+					}).join("")+"</tbody></table></scrollable>";
+					$("#info").html(cellsHtml)
+					$("#info table tbody tr").on('click', function(e){			
+						$("#cellTowerCell").val($($(e.currentTarget).children()[1]).html())
+						$("#cellTowerLac").val($($(e.currentTarget).children()[2]).html())
+						$("#oneCellTower").click()
+					});
 
-			radiusesArr.push(L.circle([cell.lat, cell.lon],{radius: cell.max_radius, color: cellSettings.circle.border.color, weight:cellSettings.circle.border.weight, fillColor: cellSettings.circle.background, fillOpacity: cellSettings.circle.opacity}).bindTooltip(text, {className: 'myTooltip'}))
-			let t = L.circleMarker([cell.lat, cell.lon],{params: {lac: cell.lac, cell: cell.cell_id}, text:text, radius: cellSettings.point.radius,     weight: cellSettings.point.border.weight,  color: cellSettings.point.border.color, fillColor: cellSettings.point.background, fillOpacity: cellSettings.point.opacity}).bindTooltip(text, {className: 'myTooltip'})
-			t.on('click', function(e){
-					
-					$("#cellTowerCell").val(e.target.options.params.cell)
-					$("#cellTowerLac").val(e.target.options.params.lac)
+					if(cellGroup.cell_data.length == 1){
+						$("#cellTowerCell").val(cellGroup.cell_data[0].cell)
+						$("#cellTowerLac").val(cellGroup.cell_data[0].lac)
+						$("#oneCellTower").click()
+					}
 				});
-			towersArr.push(t)
-		}
-		//L.featureGroup(radiusesArr).addTo(layers.cellsZones);
-		L.featureGroup(towersArr).addTo(layers.cells)
+			tMarker.on('mouseover', function(e){
+				console.log("cellGroup", cellGroup)
+			})
+			return tMarker;
+		})
+		
+		L.featureGroup(markersArr).addTo(layers.cells)
 	}
 
 	$("#"+type+">noData:visible").hide();	

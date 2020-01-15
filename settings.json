@@ -147,6 +147,10 @@
 				},
 				"centerPointColor": "red"
 			}
+		},
+		"azimut":{
+			"weight": 3,
+			"color": "orange"
 		}
 
 
