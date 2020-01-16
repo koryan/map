@@ -90,13 +90,33 @@
 				"opacity": 0.1
 			},
 			"point":{
-				"radius": 5,
-				"border":{
-					"color":"red",
-					"weight": 1
+				"outdoor":{
+					"radius": 5,
+					"border":{
+						"color":"darkgreen",
+						"weight": 1
+					},
+					"background": "lime",
+					"opacity": 0.5
 				},
-				"background": "green",
-				"opacity": 0.5
+				"indoor":{
+					"radius": 5,
+					"border":{
+						"color":"darkred",
+						"weight": 1
+					},
+					"background": "lightcoral",
+					"opacity": 0.5
+				},
+				"mix":{
+					"radius": 5,
+					"border":{
+						"color":"darkblue",
+						"weight": 1
+					},
+					"background": "lightblue",
+					"opacity": 0.5
+				}
 			}
 		},
 
@@ -123,36 +143,68 @@
 	},
 
 	"oneCell":{
-		"tower":{
-			"border":{
-				"color":"blue",
-				"weight": 1
+		"outdoor":{
+			"tower":{
+				"border":{
+					"color":"olive",
+					"weight": 1
+				},
+				"background": "darkolivegreen",
+				"opacity": 0.6,
+				"radius": 5
+				
 			},
-			"background": "navy",
-			"opacity": 0.6,
-			"radius": 5
-			
-		},
-		"poly": {
-			"border": {
-				"color":"green",
-				"weight": 1
-			},
-			"background": "lime",
-			"opacity": 0.1,
-			"outerCircle":{
+			"poly": {
 				"border": {
 					"color":"green",
 					"weight": 1
 				},
-				"centerPointColor": "red"
+				"background": "lime",
+				"opacity": 0.1,
+				"outerCircle":{
+					"border": {
+						"color":"green",
+						"weight": 1
+					},
+					"centerPointColor": "olivedrab"
+				}
+			},
+			"azimut":{
+				"weight": 3,
+				"color": "seagreen"
 			}
 		},
-		"azimut":{
-			"weight": 3,
-			"color": "orange"
+		"indoor":{
+			"tower":{
+				"border":{
+					"color":"red",
+					"weight": 1
+				},
+				"background": "firebrick",
+				"opacity": 0.6,
+				"radius": 5
+				
+			},
+			"poly": {
+				"border": {
+					"color":"indianred",
+					"weight": 1
+				},
+				"background": "lightsalmon",
+				"opacity": 0.1,
+				"outerCircle":{
+					"border": {
+						"color":"crimson",
+						"weight": 1
+					},
+					"centerPointColor": "darkred"
+				}
+			},
+			"azimut":{
+				"weight": 3,
+				"color": "darkred"
+			}
 		}
-
 
 	},
 

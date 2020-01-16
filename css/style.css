@@ -140,3 +140,5 @@ table.points.cells tbody tr{cursor:pointer;}
 #errors>error{background-color:red;display: block;padding:20px;color:white;}
 #errors>error:not(:last-of-type){margin-bottom:10px;}
 #errors>error>p{padding:0px;margin:0px;}
+
+hexagon{display:block;margin:0px auto;opacity:.7;width:16px;height:16px;background-image: url(./../img/hexagon.png);background-size: contain;background-repeat: no-repeat;position: relative;top: 2px;}

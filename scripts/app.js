@@ -379,7 +379,6 @@ function getData(type){
 		}
 		
 		var polyline = L.polyline(lineCoords, {color: colors[type].track.color, weight:colors[type].track.weight}).addTo(layers.csv);
-console.log("lineCoords", lineCoords)
 		//check if we're loading tracks and fit to track or to point
 		let check = (!!~["live", 'last'].indexOf(type));
 		if (!check){
@@ -449,13 +448,15 @@ console.log("lineCoords", lineCoords)
 
 		let oneTowerSettings = globalSettings.colors.oneCell	
 		let polyArr = [];
-		let polyCirclesArr = [];	
-		console.log("oneTowerSettings.poly.outerCricle", oneTowerSettings.poly.outerCircle)
+		let polyCirclesArr = [];
+		let cellType = ((data.height >= 0)?"out":"in")+"door";	
 		for(var el of data.poly){
-			polyArr.push(		L.polygon	(el.coords, {color: oneTowerSettings.poly.border.color, weight:oneTowerSettings.poly.border.weight, fillColor: oneTowerSettings.poly.background, fillOpacity: oneTowerSettings.poly.opacity}).bindTooltip("id: "+el.id, {className: 'myTooltip'}));
 			
-			polyCirclesArr.push(L.circle	(el.center, {radius: el.radius, color: oneTowerSettings.poly.outerCircle.border.color, weight:oneTowerSettings.poly.outerCircle.border.weight}))
-			polyCirclesArr.push(L.circleMarker(el.center,{radius: 3,    weight: 1,  color: oneTowerSettings.poly.outerCircle.centerPointColor, fillColor: oneTowerSettings.poly.outerCircle.centerPointColor, fillOpacity: 1}))
+			console.log(cellType)
+			polyArr.push(L.polygon	(el.coords, {color: oneTowerSettings[cellType].poly.border.color, weight:oneTowerSettings[cellType].poly.border.weight, fillColor: oneTowerSettings[cellType].poly.background, fillOpacity: oneTowerSettings[cellType].poly.opacity}).bindTooltip("id: "+el.id, {className: 'myTooltip'}));
+			
+			polyCirclesArr.push(L.circle	(el.center, {radius: el.radius, color: oneTowerSettings[cellType].poly.outerCircle.border.color, weight:oneTowerSettings[cellType].poly.outerCircle.border.weight}))
+			polyCirclesArr.push(L.circleMarker(el.center,{radius: 3,    weight: 1,  color: oneTowerSettings[cellType].poly.outerCircle.centerPointColor, fillColor: oneTowerSettings[cellType].poly.outerCircle.centerPointColor, fillOpacity: 1}))
 		
 			
 		}
@@ -468,11 +469,11 @@ console.log("lineCoords", lineCoords)
 		
 
 		text = "<b>Lac:</b> "+oneCellTowerParams.lac+"<br /><b>Cell:</b> "+oneCellTowerParams.cell
-		L.circleMarker(data.tower,{text:text, radius: oneTowerSettings.tower.radius,     weight: oneTowerSettings.tower.border.weight,  color: oneTowerSettings.tower.border.color, fillColor: oneTowerSettings.tower.background, fillOpacity: oneTowerSettings.tower.opacity}).bindTooltip(text, {className: 'myTooltip'}).addTo(layers.oneCellPoly);
+		L.circleMarker(data.tower,{text:text, radius: oneTowerSettings[cellType].tower.radius,     weight: oneTowerSettings[cellType].tower.border.weight,  color: oneTowerSettings[cellType].tower.border.color, fillColor: oneTowerSettings[cellType].tower.background, fillOpacity: oneTowerSettings[cellType].tower.opacity}).bindTooltip(text, {className: 'myTooltip'}).addTo(layers.oneCellPoly);
 
-console.log([data.tower, data.coords_end])
 
-		L.polyline([data.tower, data.coords_end], {color: oneTowerSettings.azimut.color, weight:oneTowerSettings.azimut.weight}).addTo(layers.oneCellPoly);
+		if(data.azimut == 360)return; //no need to draw azimut 
+		L.polyline([data.tower, data.coords_end], {color: oneTowerSettings[cellType].azimut.color, weight:oneTowerSettings[cellType].azimut.weight}).addTo(layers.oneCellPoly);
 
 	}
 
@@ -502,11 +503,19 @@ console.log([data.tower, data.coords_end])
 		}		
 		
 		let markersArr = data.map(cellGroup => {
+			
 			let text = createText({cellNum: cellGroup.cell_data.length})
-			let tMarker = L.circleMarker(cellGroup.coords,{params: {}, text:text, radius: cellSettings.point.radius,     weight: cellSettings.point.border.weight,  color: cellSettings.point.border.color, fillColor: cellSettings.point.background, fillOpacity: cellSettings.point.opacity}).bindTooltip(text, {className: 'myTooltip'})
+			let cellType = (data => {
+				let indoorN = data.filter(cell => cell.height < 0).length
+				if(indoorN == data.length)return "indoor"
+				if(indoorN == 0)return "outdoor"
+				return "mix"
+			})(cellGroup.cell_data)
+			let tMarker = L.circleMarker(cellGroup.coords,{params: {}, text:text, radius: cellSettings.point[cellType].radius,     weight: cellSettings.point[cellType].border.weight,  color: cellSettings.point[cellType].border.color, fillColor: cellSettings.point[cellType].background, fillOpacity: cellSettings.point[cellType].opacity}).bindTooltip(text, {className: 'myTooltip'})
 			tMarker.on('click', function(e){
 					let cellsHtml = "<scrollable><table class='cells points'><thead><tr><td>№</td><td>Cell</td><td>Lac</td><td>Azimut</td><td>Height</td></tr></thead><tbody>"+
 						cellGroup.cell_data.map(cell => {
+						if(cell.azimut == 360)cell.azimut = "<hexagon></hexagon>"
 						return "<tr><td></td><td>"+ cell.cell +"</td><td>"+ cell.lac +"</td><td>"+ cell.azimut +"</td><td>"+ cell.height +"</td></tr>"
 					}).join("")+"</tbody></table></scrollable>";
 					$("#info").html(cellsHtml)
