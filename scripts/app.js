@@ -548,10 +548,10 @@ function getData(type){
 					}
 				});
 			tMarker.on('mouseover', function(e){
-				console.log("mouseover")
 				if(tMarker.options.azimuts && tMarker.options.azimuts.length)return;
 				tMarker.options.azimuts = []
 				for(var cell of cellGroup.cell_data.filter(el => el.azimut != 360)){
+					let cellType = ((cell.height >= 0)?"out":"in")+"door";	
 					let t = L.polyline([cellGroup.coords, cell.coords_end], {color: oneTowerSettings[cellType].azimut.color, weight:oneTowerSettings[cellType].azimut.weight});
 					tMarker.options.azimuts.push(t)
 					t.addTo(layers.cellAzimuts).bringToBack()
