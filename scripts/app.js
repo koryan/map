@@ -7,11 +7,12 @@ let overlaysArr = [
 	["pointsLayer", "Точки"],
 	["csv", "Трек"],
 	["geozones", "Геозоны"],
-	["cells", "Вышки"],
 	//["cellsZones", "Вышки c радиусом"],
 	// ["oneCell", "oneCell"],
-	["oneCellPoly", "oneCellPoly"],
 	["oneCellPolyWCircles", "oneCellPolyWCircles"],
+	["oneCellPoly", "oneCellPoly"],	
+	["cellAzimuts", "Ёжики"],
+	["cells", "Вышки"],
 ]
 
 var layers = {	
@@ -22,8 +23,9 @@ var layers = {
 		$("div.pointInfo").html("<i>Click on point to get it data</i>")
 	}
 }
-for(var overlay of overlaysArr){
-	layers[overlay[0]] = L.layerGroup()
+for(let i in overlaysArr){
+	layers[overlaysArr[i][0]] = L.layerGroup().setZIndex(overlaysArr.length - i);
+
 }
 
 let copyToClipboard = function(text) {
@@ -485,18 +487,31 @@ function getData(type){
 			let text = "<b>Название: </b>"+gz.name
 			let bgColor = (gz.attrs && gz.attrs.color)? gz.attrs.color: gzSettings.defaultColor;
 			if(gz.poiArea.length){
-				return L.polygon(gz.poiArea, {color: gzSettings.border.color, weight:gzSettings.border.weight, fillColor: bgColor, fillOpacity: gzSettings.opacity}).bindTooltip(text, {className: 'myTooltip'});
+				return L.polygon(gz.poiArea, {name: gz.name, color: gzSettings.border.color, weight:gzSettings.border.weight, fillColor: bgColor, fillOpacity: gzSettings.opacity}).bindTooltip(text, {className: 'myTooltip'});
 			}else{ //cirle
 				let radius =  Math.round(gz.poiCenter[2]*magicEmpiricalNumber)
 				text += "<br><b>Радиус:</b> "+ radius
-				return L.circle([gz.poiCenter[0], gz.poiCenter[1]],{radius: radius, color: gzSettings.border.color, weight:gzSettings.border.weight, fillColor: bgColor, fillOpacity: gzSettings.opacity}).bindTooltip(text, {className: 'myTooltip'});
+				return L.circle([gz.poiCenter[0], gz.poiCenter[1]],{name: gz.name, radius: radius, color: gzSettings.border.color, weight:gzSettings.border.weight, fillColor: bgColor, fillOpacity: gzSettings.opacity}).bindTooltip(text, {className: 'myTooltip'});
 			}
 		}).filter(el => el);
 		L.featureGroup(geoArr).addTo(layers.geozones);
+		console.log(geoArr)
+		let html = "<scrollable><table class='geozones points'><thead><tr><td>№</td><td>Name</td></tr></thead><tbody>"+
+			geoArr.map(item => {
+				//console.log(item._latlng)
+				
+			return "<tr bounds="+JSON.stringify(item.getBounds())+"><td></td><td>"+ item.options.name +"</td></tr>"
+		}).join("")+"</tbody></table></scrollable>";
+		$("#info").html(html)
+		$("#info table tbody tr").on('click', function(e){
+			let t = JSON.parse($(e.currentTarget).attr('bounds'))
+			bigMap.fitBounds([[t._northEast.lat, t._northEast.lng], [t._southWest.lat, t._southWest.lng]])
+		})
 	}
 
 	let drawTowers = function(data){
 		let cellSettings = globalSettings.colors.points.towerCells; 
+		let oneTowerSettings = globalSettings.colors.oneCell;
 		let createText = function(obj){
 			
 			return Object.keys(obj).map((i) => "<b>"+i+":</b> "+obj[i]).join("<br>");
@@ -513,6 +528,7 @@ function getData(type){
 			})(cellGroup.cell_data)
 			let tMarker = L.circleMarker(cellGroup.coords,{params: {}, text:text, radius: cellSettings.point[cellType].radius,     weight: cellSettings.point[cellType].border.weight,  color: cellSettings.point[cellType].border.color, fillColor: cellSettings.point[cellType].background, fillOpacity: cellSettings.point[cellType].opacity}).bindTooltip(text, {className: 'myTooltip'})
 			tMarker.on('click', function(e){
+				console.log("click")
 					let cellsHtml = "<scrollable><table class='cells points'><thead><tr><td>№</td><td>Cell</td><td>Lac</td><td>Azimut</td><td>Height</td></tr></thead><tbody>"+
 						cellGroup.cell_data.map(cell => {
 						if(cell.azimut == 360)cell.azimut = "<hexagon></hexagon>"
@@ -532,7 +548,23 @@ function getData(type){
 					}
 				});
 			tMarker.on('mouseover', function(e){
-				console.log("cellGroup", cellGroup)
+				console.log("mouseover")
+				if(tMarker.options.azimuts && tMarker.options.azimuts.length)return;
+				tMarker.options.azimuts = []
+				for(var cell of cellGroup.cell_data.filter(el => el.azimut != 360)){
+					let t = L.polyline([cellGroup.coords, cell.coords_end], {color: oneTowerSettings[cellType].azimut.color, weight:oneTowerSettings[cellType].azimut.weight});
+					tMarker.options.azimuts.push(t)
+					t.addTo(layers.cellAzimuts)
+				}
+				
+				
+			})
+			tMarker.on('mouseout', function(e){
+				if(!tMarker.options.azimuts)return
+				for(let t of tMarker.options.azimuts){
+					t.remove(bigMap)
+					delete tMarker.options.azimuts
+				}
 			})
 			return tMarker;
 		})

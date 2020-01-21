@@ -131,6 +131,9 @@ table.points.cells tbody tr>td:nth-child(2){display:table-cell;}
 table.points.cells tbody tr>td:nth-child(3){display:table-cell;}
 table.points.cells tbody tr{cursor:pointer;}
 
+table.points.geozones tbody tr>td:nth-child(2){display:table-cell;}
+table.points.geozones tbody tr{cursor:pointer;}
+
 .totalWrapper>*{display:inline-block;vertical-align:middle;}
 .totalWrapper>.downloadCsv>img{height:20px;margin-left: 20px}
 
