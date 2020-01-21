@@ -24,7 +24,7 @@ var layers = {
 	}
 }
 for(let i in overlaysArr){
-	layers[overlaysArr[i][0]] = L.layerGroup().setZIndex(overlaysArr.length - i);
+	layers[overlaysArr[i][0]] = L.layerGroup().setZIndex(i+1);
 
 }
 
@@ -554,9 +554,9 @@ function getData(type){
 				for(var cell of cellGroup.cell_data.filter(el => el.azimut != 360)){
 					let t = L.polyline([cellGroup.coords, cell.coords_end], {color: oneTowerSettings[cellType].azimut.color, weight:oneTowerSettings[cellType].azimut.weight});
 					tMarker.options.azimuts.push(t)
-					t.addTo(layers.cellAzimuts)
+					t.addTo(layers.cellAzimuts).bringToBack()
 				}
-				
+				//layers.cellAzimuts
 				
 			})
 			tMarker.on('mouseout', function(e){
@@ -668,6 +668,7 @@ var mapInit = function(){
 	for(tOverlay of overlaysArr){
 		overlays[tOverlay[1]] = layers[tOverlay[0]]
 	}
+	console.log(overlays)
 	L.control.layers(baseLayers, overlays).addTo(bigMap);
 
 	onZoom();
