@@ -33,24 +33,28 @@
 		</caption>
 		<tr>
 			<td>Абонент</td>
-			<td><input type='phone' id='msisdn' >
+			<td colspan="2"><input type='phone' id='msisdn' ></td>
 		</tr>
 		<tr class="datetime">
-			<td>Дата&nbsp;и время&nbsp;с</td>
+			<td>C</td>
 			<td>
 				<input id='fromDate' name="Date" type="text" />
+			</td>
+			<td>
 				<input id='fromTime' name="fromTime" type="text" />
 			</td>
 		</tr>
 		<tr class="datetime">
-			<td>Дата&nbsp;и время&nbsp;по</td>
+			<td>По</td>
 			<td>
 				<input id='tillDate' name="tillDate" type="text" />
+			</td>
+			<td>
 				<input id='tillTime' name="tillTime" type="text" />
 			</td>
 		</tr>
 		<tr>
-			<td colspan="2" class='buttons'>
+			<td colspan="3" class='buttons'>
 				
 				
 				<button id='raw'  title='Сырые данные'>
@@ -77,7 +81,18 @@
 					<smallLoader></smallLoader>
 					<noData title='Нет данных'></noData>
 					<span><img alt="Геозоны" src='./img/geozone.png'></span>
-				</button><br>
+				</button>
+				<button id='userPoints' correctTitle="Точки" wrongTitle="Точки (приблизьте карту)" class='withSelect'>
+					<smallLoader></smallLoader>
+					<noData title='Нет данных'></noData>
+					<span><img alt="Точки" src='./img/dots.png'></span>
+				</button>
+				<select title='Тип данных' id='userPointsMethod'>
+					<option value='1'>GPS</option>
+					<option value='2'>Wi-Fi</option>
+					<option value='3'>LBS</option>
+				</select>
+				<br>
 				<button id='cellTowers' correctTitle="Сотовые вышки" wrongTitle="Сотовые вышки (приблизьте карту)">
 					<smallLoader></smallLoader>
 					<noData title='Нет данных'></noData>

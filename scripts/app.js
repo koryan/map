@@ -13,6 +13,7 @@ let overlaysArr = [
 	["oneCellPoly", "oneCellPoly"],	
 	["cellAzimuts", "Ёжики"],
 	["cells", "Вышки"],
+	['userPoints', 'Точки']
 ]
 
 var layers = {	
@@ -148,7 +149,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	$('.buttons>*').click(function(e){
 
 		let type = e.currentTarget.id
-		if(!!~['raw','processed', 'live', 'last', 'geozones', 'cellTowers', 'oneCellTower'].indexOf(type)){
+		if(!!~['raw','processed', 'live', 'last', 'geozones', 'cellTowers', 'oneCellTower', 'userPoints'].indexOf(type)){
 			getData(type)
 		}else if(!!~['clear'].indexOf(type)){
 			layers.clear()
@@ -162,7 +163,6 @@ document.addEventListener("DOMContentLoaded", function() {
 	}
 
 	$("input[id^=cellTower]").click(e => {
-		console.log()
 		e.preventDefault();
 		return false;
 	})
@@ -214,6 +214,19 @@ function getData(type){
 				}
 				uri += "cells?"+genParamsString(params);
 				break;
+			case 'userPoints':
+				params = {
+					latb: bigMap.getBounds().getNorthWest().lat,
+					lonb: bigMap.getBounds().getNorthWest().lng,
+					lata: bigMap.getBounds().getSouthEast().lat,
+					lona: bigMap.getBounds().getSouthEast().lng,
+					startTime: moment(document.getElementById('fromDate').value, "DD.MM.YYYY").format("YYYY-MM-DD") + 'T' + document.getElementById('fromTime').value+':00',
+					endTime: moment(document.getElementById('fromDate').value, "DD.MM.YYYY").format("YYYY-MM-DD") + 'T' + document.getElementById('tillTime').value+':00',
+					method: $("#userPointsMethod").val()
+
+				}
+				uri += "area?"+genParamsString(params);
+				break;
 			case 'oneCellTower':
 				params = oneCellTowerParams
 				uri += "poly?"+genParamsString(params);
@@ -253,7 +266,13 @@ function getData(type){
 					cb(false, [])
 					return;
 				}
-				cb(false, JSON.parse(data))	
+				try{
+					let parsed = JSON.parse(data)
+					cb(false, parsed)	
+				}catch(e){
+					cb(e, e.message)
+				}
+				
 		    })
 	    }).catch(function(err) {  
 	    	loader.clear();
@@ -325,17 +344,22 @@ function getData(type){
 				text += "Click it!"
 			}
 
-			
+			if(type == "processed"){
+				let motion = currentMarker.inputs[0].v.motion
+				info.push(motion);
+				console.log(motion, colors[type].circle.backgrounds["motion"+motion])
+				colors[type].circle.background = colors[type].circle.backgrounds["motion"+motion];
+				colors[type].point.background = colors[type].point.backgrounds["motion"+motion];
+			}
 			if(type == "raw"){
 				let posMethod = currentMarker.inputs[0].v.pos_method;
 				info.push(posMethod);
-				colors[type].point.border.color = colors[type].point.borders[posMethod];
+				colors[type].circle.background = colors[type].circle.backgrounds[posMethod];
 				colors[type].point.background = colors[type].point.backgrounds[posMethod];
 			}
-
 			let items = {
 				circle	: L.circle(      coords,{type: "circle", text:pointsListText, radius: radius, weight: colors[type].circle.border.weight, color: colors[type].circle.border.color, fillColor: colors[type].circle.background, fillOpacity: colors[type].circle.opacity}),
-				point	: L.circleMarker(coords,{type: "point", text:pointsListText, radius: 7,      weight: colors[type].point.border.weight,  color: colors[type].point.border.color, fillColor: colors[type].point.background})
+				point	: L.circleMarker(coords,{type: "point", text:pointsListText, radius: colors[type].point.radius,      weight: colors[type].point.border.weight,  color: colors[type].point.border.color, fillColor: colors[type].point.background, fillOpacity: colors[type].point.opacity})
 			}
 
 			//if (usedCoords[""+coords].length > globalSettings.maxPointLengthInTooltip)
@@ -344,14 +368,14 @@ function getData(type){
 				items[j].bindTooltip(text, {className: 'myTooltip'})
 				
 
-				items[j].on('click', function(e){
-					$("div#pointInfo").html(e.target.options.text)
-				})
+				// items[j].on('click', function(e){
+				// 	console.log("click")
+				// 	$("div#pointInfo").html(e.target.options.text)
+				// })
 				items[j].on('mouseover', function(e){
-
 					this.setStyle({
 						fillOpacity: colors[type][e.target.options.type].opacity + .2,
-						weight: colors[type][e.target.options.type].border.weight + 2
+						weight: colors[type][e.target.options.type].border.weight + 1
 					})
 					$("tr[textForPoint="+i+"]").addClass("hoverLike")
 				})
@@ -389,8 +413,10 @@ function getData(type){
 			//bigMap.fitBounds(circle.getBounds());
 		}
 
+		//pointsList = pointsList.reverse()
 		let headerArr = ["№", "время", "радиус"]
-		if(type == "raw")headerArr.push("pos метод")
+		if (type == "raw")headerArr.push("pos метод")
+		if (type == "processed")headerArr.push("motion")
 		$("#info").html(
 			"<div class='totalWrapper'><total>Всего: "+ pointsList.length +"</total>"+
 			"<a class='downloadCsv' href='#'><img src='./img/csvDownload.png' /></a></div>"+
@@ -400,8 +426,19 @@ function getData(type){
 				"</tr></thead>"+
 
 				"<tbody>"+
+
 				pointsList.map((el, index) => {
-					return "<tr textForPoint="+ index +"><td></td><td>"+ el.info.join("</td><td>") + "</td></tr>"
+					
+
+					let rows = el.info.map(row => {
+						let color = undefined;
+						if(type == "raw")color = globalSettings.colors.points.raw.circle.backgrounds[row]
+						if(type == "processed")color = globalSettings.colors.points.processed.circle.backgrounds["motion"+row]
+						
+						return "<td"+ ((color)?" style='background-color:"+color+"'":"") + ">"+row+"</td>"
+					})
+					
+					return "<tr textForPoint="+ index +"><td></td>"+rows.join('')+"</tr>"
 				}).join('')+
 				"</tbody>"+
 			"</table></scrollable>");
@@ -454,7 +491,6 @@ function getData(type){
 		let cellType = ((data.height >= 0)?"out":"in")+"door";	
 		for(var el of data.poly){
 			
-			console.log(cellType)
 			polyArr.push(L.polygon	(el.coords, {color: oneTowerSettings[cellType].poly.border.color, weight:oneTowerSettings[cellType].poly.border.weight, fillColor: oneTowerSettings[cellType].poly.background, fillOpacity: oneTowerSettings[cellType].poly.opacity}).bindTooltip("id: "+el.id, {className: 'myTooltip'}));
 			
 			polyCirclesArr.push(L.circle	(el.center, {radius: el.radius, color: oneTowerSettings[cellType].poly.outerCircle.border.color, weight:oneTowerSettings[cellType].poly.outerCircle.border.weight}))
@@ -483,29 +519,54 @@ function getData(type){
 		let magicEmpiricalNumber = 62661.2321733;
 		let gzSettings = globalSettings.colors.geozones		
 		
-		let geoArr = data.map(gz => {
+		let geoArr = data.map((gz, index) => {
 			let text = "<b>Название: </b>"+gz.name
 			let bgColor = (gz.attrs && gz.attrs.color)? gz.attrs.color: gzSettings.defaultColor;
+			let item = undefined;
 			if(gz.poiArea.length){
-				return L.polygon(gz.poiArea, {name: gz.name, color: gzSettings.border.color, weight:gzSettings.border.weight, fillColor: bgColor, fillOpacity: gzSettings.opacity}).bindTooltip(text, {className: 'myTooltip'});
+				item = L.polygon(gz.poiArea, {name: gz.name, color: gzSettings.border.color, weight:gzSettings.border.weight, fillColor: bgColor, fillOpacity: gzSettings.opacity}).bindTooltip(text, {className: 'myTooltip'});
 			}else{ //cirle
 				let radius =  Math.round(gz.poiCenter[2]*magicEmpiricalNumber)
 				text += "<br><b>Радиус:</b> "+ radius
-				return L.circle([gz.poiCenter[0], gz.poiCenter[1]],{name: gz.name, radius: radius, color: gzSettings.border.color, weight:gzSettings.border.weight, fillColor: bgColor, fillOpacity: gzSettings.opacity}).bindTooltip(text, {className: 'myTooltip'});
+				item = L.circle([gz.poiCenter[0], gz.poiCenter[1]],{name: gz.name, radius: radius, color: gzSettings.border.color, weight:gzSettings.border.weight, fillColor: bgColor, fillOpacity: gzSettings.opacity}).bindTooltip(text, {className: 'myTooltip'});
 			}
+			item.on('mouseover', function(e){
+				this.setStyle({
+					fillOpacity:  gzSettings.opacity + .2,
+					weight: gzSettings.border.weight + 1
+				})
+				$("tr[textForPoint="+index+"]").addClass("hoverLike")
+			})
+			item.on('mouseout', function(e){
+				this.setStyle({
+					fillOpacity:  gzSettings.opacity,
+					weight: gzSettings.border.weight
+				})
+				$("tr[textForPoint="+index+"]").removeClass("hoverLike")
+			})
+			return item;
 		}).filter(el => el);
+
 		L.featureGroup(geoArr).addTo(layers.geozones);
-		console.log(geoArr)
-		let html = "<scrollable><table class='geozones points'><thead><tr><td>№</td><td>Name</td></tr></thead><tbody>"+
-			geoArr.map(item => {
-				//console.log(item._latlng)
+		let html = "<scrollable><table class='geozones points'><thead><tr><td>№</td><td>Название</td></tr></thead><tbody>"+
+			geoArr.map((item, index) => {
 				
-			return "<tr bounds="+JSON.stringify(item.getBounds())+"><td></td><td>"+ item.options.name +"</td></tr>"
+			return "<tr bounds="+JSON.stringify(item.getBounds())+" textForPoint="+ index +"><td></td><td>"+ item.options.name +"</td></tr>"
 		}).join("")+"</tbody></table></scrollable>";
 		$("#info").html(html)
 		$("#info table tbody tr").on('click', function(e){
 			let t = JSON.parse($(e.currentTarget).attr('bounds'))
 			bigMap.fitBounds([[t._northEast.lat, t._northEast.lng], [t._southWest.lat, t._southWest.lng]])
+		}).on('mouseenter', e => {
+			geoArr[$(e.currentTarget).attr('textForPoint')].setStyle({
+				fillOpacity:  gzSettings.opacity + .2,
+				weight: gzSettings.border.weight + 1
+			})
+		}).on('mouseleave', e => {
+			geoArr[$(e.currentTarget).attr('textForPoint')].setStyle({
+				fillOpacity:  gzSettings.opacity,
+				weight: gzSettings.border.weight
+			})
 		})
 	}
 
@@ -521,7 +582,7 @@ function getData(type){
 			
 			let text = createText({cellNum: cellGroup.cell_data.length})
 			let cellType = (data => {
-				let indoorN = data.filter(cell => cell.height < 0).length
+				let indoorN = data.filter(cell => cell.height <= 0).length
 				if(indoorN == data.length)return "indoor"
 				if(indoorN == 0)return "outdoor"
 				return "mix"
@@ -551,7 +612,7 @@ function getData(type){
 				if(tMarker.options.azimuts && tMarker.options.azimuts.length)return;
 				tMarker.options.azimuts = []
 				for(var cell of cellGroup.cell_data.filter(el => el.azimut != 360)){
-					let cellType = ((cell.height >= 0)?"out":"in")+"door";	
+					let cellType = ((cell.height > 0)?"out":"in")+"door";	
 					let t = L.polyline([cellGroup.coords, cell.coords_end], {color: oneTowerSettings[cellType].azimut.color, weight:oneTowerSettings[cellType].azimut.weight});
 					tMarker.options.azimuts.push(t)
 					t.addTo(layers.cellAzimuts).bringToBack()
@@ -572,24 +633,42 @@ function getData(type){
 		L.featureGroup(markersArr).addTo(layers.cells)
 	}
 
+	let drawUserPoints = function(data){
+		let posMethods = [2, 4096, 8192]
+		let color = globalSettings.colors.points.raw.point.borders[posMethods[+$("#userPointsMethod").val() -1]]
+		
+		if(!data.flat().length){
+			console.error("Empty data :(");
+			showError('Нет данных')
+		}
+
+		for(arr of data){
+			for(coords of arr){
+				L.circle(coords, {radius:1, color: color}).addTo(layers.userPoints)
+
+			}
+		}
+	}
+
 	$("#"+type+">noData:visible").hide();	
 	$('#msisdn.error').removeClass("error");
 	$('#cellTowerLac.error').removeClass("error");
 	$('#cellTowerCell.error').removeClass("error");
 	
 	let msisdn = document.getElementById('msisdn').value
-	let fromTime = moment(document.getElementById('fromDate').value + ' ' + document.getElementById('fromTime').value+':59', 'DD.MM.YYYY HH:mm:ss').toISOString()
+	let fromTime = moment(document.getElementById('fromDate').value + ' ' + document.getElementById('fromTime').value+':00', 'DD.MM.YYYY HH:mm:ss').toISOString()
 	let tillTime = moment(document.getElementById('tillDate').value + ' ' + document.getElementById('tillTime').value+':59', 'DD.MM.YYYY HH:mm:ss').toISOString()
 	let oneCellTowerParams = {
 		lac: parseInt(document.getElementById('cellTowerLac').value),
 		cell: parseInt(document.getElementById('cellTowerCell').value)
 	}
-	if(type != "cellTowers" && type != "oneCellTower" && (!msisdn || !new RegExp(/^\+?7\(*\d{3}\)*\d{7}$/).test(msisdn))){
+	if(type != "userPoints" && type != "cellTowers" && type != "oneCellTower" && (!msisdn || !new RegExp(/^\+?7\(*\d{3}\)*\d{7}$/).test(msisdn))){
 		$('#msisdn').addClass("error");
 		showError('Введите номер абонента')
 		return;
 	}
 
+	
 	
 	if(type == "oneCellTower"){
 		let emptyParams = Object.entries(oneCellTowerParams).filter(el => !el[1]).map(el => el[0])
@@ -621,6 +700,8 @@ function getData(type){
 			drawTowers(data)
 		}else if(type == 'oneCellTower'){
 			drawOneTower(data)
+		}else if(type == 'userPoints'){
+			drawUserPoints(data)
 		}else{			
 			drawPoints(type, data)
 		}		
@@ -634,12 +715,16 @@ var mapInit = function(){
 		streets  = L.tileLayer(mbUrl, {id: 'mapbox.streets'});
 
 	var onZoom = function(){
-		let check = bigMap.getBounds().getNorth() - bigMap.getBounds().getSouth() > globalSettings.maxMapSizeForCellTowers && 
-			bigMap.getBounds().getEast() - bigMap.getBounds().getWest() > globalSettings.maxMapSizeForCellTowers
-		$("#cellTowers").prop( "disabled", check );
-		
-		//$("#cellTowers").prop( "title", $("#cellTowers").prop("correctTitle"))
-		$("#cellTowers").prop( "title", (!check)? $("#cellTowers").attr("correctTitle"):$("#cellTowers").attr("wrongTitle"))
+		let check = function(max){
+			return bigMap.getBounds().getNorth() - bigMap.getBounds().getSouth() > max && 
+				bigMap.getBounds().getEast() - bigMap.getBounds().getWest() > max
+		}
+		$("#cellTowers").prop( "disabled", check(globalSettings.maxMapSizeForCellTowers) );
+		$("#cellTowers").prop( "title", (!check(globalSettings.maxMapSizeForCellTowers))? $("#cellTowers").attr("correctTitle"):$("#cellTowers").attr("wrongTitle"))
+
+		$("#userPoints").prop( "disabled", check(globalSettings.maxMapSizeForUserPoints) );
+		$("#userPoints").prop( "title", (!check(globalSettings.maxMapSizeForUserPoints))? $("#userPoints").attr("correctTitle"):$("#userPoints").attr("wrongTitle"))
+
 	}
 
 	bigMap = L.map('map', {
@@ -668,7 +753,6 @@ var mapInit = function(){
 	for(tOverlay of overlaysArr){
 		overlays[tOverlay[1]] = layers[tOverlay[0]]
 	}
-	console.log(overlays)
 	L.control.layers(baseLayers, overlays).addTo(bigMap);
 
 	onZoom();

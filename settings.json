@@ -1,6 +1,8 @@
 {
 "maxPointLengthInTooltip": 10,
 "maxMapSizeForCellTowers": 0.15,
+"maxMapSizeForUserPoints": 0.15,
+
 "colors":{
 	"points":{
 		"raw": {
@@ -9,28 +11,29 @@
 					"color":"black",
 					"weight": 1
 				},
-				"background": "orange",
-				"opacity": 0.5
+				"background": null,
+				"backgrounds": {	
+					"0": "rgba(255, 0,0, .4)",
+					"8192": "rgba(0, 255, 0, .4)",
+					"4096": "rgba(0, 255, 255, .4)",
+					"2": "rgba(0, 0, 255, .4)"
+				},
+				"opacity": 0.1
 			},
 			"point":{
 				"border": {
-					"color": null,
+					"color": "black",
 					"weight": 1
 				},
-				"opacity": 0.8,
-				"borders": {	
-					"0": "red",
-					"8192": "orange",
-					"4096": "yellow",
-					"2": "blue"
-				},
+				"opacity": 0.5,
+				"radius": 6,
 				"background": null,
 				"backgrounds": {	
-					"0": "red",
-					"8192": "orange",
-					"4096": "yellow",
-					"2": "navy"
-				}
+					"0": "rgba(255, 0,0, .4)",
+					"8192": "rgba(0, 255, 0, .4)",
+					"4096": "rgba(0, 255, 255, .4)",
+					"2": "rgba(0, 0, 255, .4)"
+				}			
 			},
 			"track": {
 				"color":"blue",
@@ -43,20 +46,35 @@
 					"color":"brown",
 					"weight": 1
 				},
-				"background": "red",
-				"opacity": 0.05
+				"background": null,
+				"backgrounds":{
+					"motion0":"rgba(255, 0,0, .4)",
+					"motion1":"rgba(255, 255, 0, .4)",
+					"motion2":"rgba(100, 100  , 0, .4)",
+					"motion3":"rgba(0,0, 255, .4)",
+					"motion4":"rgba(0,255,255, .4)"
+				},
+				"opacity": 0.5
 			},
 			"point":{
 				"border":{
-					"color":"yellow",
+					"color":"red",
 					"weight": 1
 				},
 				"background": "black",
-				"opacity": 0.4
+				"backgrounds":{
+					"motion0":"rgba(255, 0,0, .4)",
+					"motion1":"rgba(255, 255, 0, .4)",
+					"motion2":"rgba(100, 100  , 0, .4)",
+					"motion3":"rgba(0,0, 255, .4)",
+					"motion4":"rgba(0,255,255, .4)"
+				},
+				"opacity": 0.4,
+				"radius": 7
 			},
 			"track": {
 				"color":"red",
-				"weight":3
+				"weight":2
 			}
 		},
 		"last": {
@@ -73,6 +91,8 @@
 					"color":"green",
 					"weight": 1
 				},
+				"radius": 6,
+				"opacity": 0.2,
 				"background": "blue"
 			},
 			"track": {

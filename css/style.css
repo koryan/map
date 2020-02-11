@@ -1,7 +1,7 @@
 html, body {
 	height: 100%;
 	margin: 0;
-	font-family: Arial;
+	font-family: sans-serif;
 	font-size: 20px
 }
 body{
@@ -45,13 +45,13 @@ body{
     margin-bottom: 15px;
     font-size: 110%;
 }
-#controls table.controls input{padding:0px 3px;font-size:90%;text-align:right;box-sizing: border-box; }
-#controls table.controls tr.datetime input{}
-#controls table.controls tr.datetime input:first-of-type{min-width:5.6em;width:58%;}
-#controls table.controls tr.datetime input:last-of-type{min-width:3.1em;width:38%;}
+.ui-timepicker-viewport, .ui-datepicker{font-size:70% !important;}
+#controls table.controls input{padding:0px 3px;font-size:80%;text-align:right;box-sizing: border-box; }
+#controls table.controls tr.datetime td:nth-child(2) input{min-width:5.6em;width:100%;}
+#controls table.controls tr.datetime td:nth-child(3) input{min-width:3.1em;width:100%;}
 #controls table.controls tr>td{padding:0px;}
-#controls table.controls tr>td:first-of-type{padding-right:5px;width:40%;}
-#controls table.controls tr:first-of-type input{width:97.5%;}
+#controls table.controls tr>td:first-of-type{padding-right:5px;width:30%;}
+#controls table.controls tr:first-of-type input{width:100%;}
 
 #controls table.controls td.buttons{padding-top:15px;}
 #controls table.controls td.buttons>button[disabled]{cursor:not-allowed;opacity: .4}
@@ -72,6 +72,9 @@ body{
 
 #controls table.controls td.buttons button>*{vertical-align: middle}
 #controls table.controls td.buttons button>*>*{vertical-align: middle}
+#controls table.controls td.buttons button.withSelect{min-width:2.6em;padding:0px;}
+#controls table.controls td.buttons button.withSelect~select{min-width:0px;margin-left:-8px;font-size:70%;padding:0px;text-align-last: center;width:3.83em;}
+#controls table.controls td.buttons button.withSelect~select>option{direction: rtl; }
 
 div#info{min-height: 0;display:flex;flex-direction:column;}
 div#info>*:nth-child(1){margin-top:10px;}
@@ -145,3 +148,5 @@ table.points.geozones tbody tr{cursor:pointer;}
 #errors>error>p{padding:0px;margin:0px;}
 
 hexagon{display:block;margin:0px auto;opacity:.7;width:16px;height:16px;background-image: url(./../img/hexagon.png);background-size: contain;background-repeat: no-repeat;position: relative;top: 2px;}
+
+
