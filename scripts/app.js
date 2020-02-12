@@ -13,7 +13,7 @@ let overlaysArr = [
 	["oneCellPoly", "oneCellPoly"],	
 	["cellAzimuts", "Ёжики"],
 	["cells", "Вышки"],
-	['userPoints', 'Точки']
+	['userPoints', 'Точки ']
 ]
 
 var layers = {	
@@ -635,7 +635,7 @@ function getData(type){
 
 	let drawUserPoints = function(data){
 		let posMethods = [2, 4096, 8192]
-		let color = globalSettings.colors.points.raw.point.borders[posMethods[+$("#userPointsMethod").val() -1]]
+		let color = globalSettings.colors.points.raw.point.backgrounds[posMethods[+$("#userPointsMethod").val() -1]]
 		
 		if(!data.flat().length){
 			console.error("Empty data :(");
@@ -726,7 +726,6 @@ var mapInit = function(){
 		$("#userPoints").prop( "title", (!check(globalSettings.maxMapSizeForUserPoints))? $("#userPoints").attr("correctTitle"):$("#userPoints").attr("wrongTitle"))
 
 	}
-
 	bigMap = L.map('map', {
 		center: [55.751244, 37.618423],
 		zoom: 12,
