@@ -1,4 +1,5 @@
 {
+	"appPort": 50001,
 	"postUrl": "http://10.40.94.4:9005/ldtdpsvc/rest/v0/ldtd",
 	"fakeFootprintsUrl": "http://10.72.12.8:9006/ldtdpsvc/rest/v0/mapp/receiver",
 	"mtsPoisk": {
@@ -17,15 +18,15 @@
 	},
 	"area0": {
 		"user": "sodmtd_metric",
-		"host": "10.72.12.21",
-		"database": "sodmtd",
+		"host": "10.40.94.13",
+		"database": "sodmtd_1",
 		"password": "C0mmonM3nr1csPOSW0RD",
 		"port": 5432
 	},
 	"area1": {
 		"user": "sodmtd_metric",
-		"host": "10.72.12.25",
-		"database": "sodmtd",
+		"host": "10.40.94.16",
+		"database": "sodmtd_1",
 		"password": "C0mmonM3nr1csPOSW0RD",
 		"port": 5432
 	}

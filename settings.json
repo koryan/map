@@ -146,14 +146,18 @@
 					"color":"yellow",
 					"weight": 1
 				},
-				"background": "orange"
+				"background": "orange",
+				"opacity": 0.1
+
 			},
 			"point":{
 				"border":{
 					"color":"green",
 					"weight": 1
 				},
-				"background": "blue"
+				"background": "blue",
+				"opacity": 0.1,
+				"radius": 7
 			},
 			"track": {
 				"color":"red",

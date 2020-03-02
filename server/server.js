@@ -5,10 +5,10 @@ const app = module.exports = express();
 const { Pool } = require('pg');
 const async = require('async');
 const request = require('request');
-const env = ["preProd","prod"][0];
+const env = ["prod","preProd"][1];
 const conf = require('./'+env+'Conf.json');
 
-app.set('port', 3001);
+app.set('port', conf.appPort);
 
 let initPool = function(data){
 	let poolConnetorParams = {
@@ -49,7 +49,7 @@ let checkMsisdn =  function (req, res, next) {
 app.get('/favicon.ico', (req, res) => res.status(204));
 
 app.get('/geo', checkMsisdn, function(req, res){ 
-	
+	console.log("geo query with params",req.query)
     let msisdn = req.query.msisdn;
 
     connectors.mtsPoisk.query("select get_user_zone from poi.get_user_zone("+msisdn+");", (err, data) => {
@@ -58,12 +58,14 @@ app.get('/geo', checkMsisdn, function(req, res){
             endWithError(res, 500, "DB error ("+err+")");
             return;
         }
+        console.log("OK")
 	    res.json(data.rows[0].get_user_zone);
 	})    
 }); 
 
 
 app.get('/area', function(req, res, next){
+	console.log("area query with params",req.query)
 	if(!req.query.lata || !req.query.latb || !req.query.lona || !req.query.lonb){
 		endWithError(res, 400, "Missing coords");
     	return;
@@ -94,13 +96,16 @@ app.get('/area', function(req, res, next){
 	], function(err, results){
 		if(err){
 			console.error("!! Error:", err);
-			endWithError(res, 500, "DB error ("+err+")");
+			endWithError(res, 500, "DB error");
+			return;
 		}
+		console.log("OK")
 		res.json(results[0].rows[0].f_get_all_points.concat(results[1].rows[0].f_get_all_points));
 	})
 })
 
 app.get('/coords', [checkMsisdn,function(req, res, next){
+	console.log("coords query with params",req.query)
 	if (!req.query.type){
 		endWithError(res, 400, "Missing type");
     	return;
@@ -153,6 +158,8 @@ app.get('/coords', [checkMsisdn,function(req, res, next){
 		queryBody.endTime = req.query.endTime;
 	}
 
+	console.log("trying to make request to "+url+" with payload", queryBody)
+
 	request({
 		uri: url,
 		method: 'POST',
@@ -167,82 +174,22 @@ app.get('/coords', [checkMsisdn,function(req, res, next){
 	}, function (err, result, body) {
 	    if (err){
 			console.error("!! Error:", err);
-			endWithError(res, 500, "POST error ("+err+")");
+			endWithError(res, 500, "POST error");
 			return;
 		}
 		if (result.statusCode != 200){
-			console.error("!! Error:", result.statusCode, result.statusMessage, result.body);
-			endWithError(res, 500, "Error from remote server "+result.statusCode+" "+result.statusMessage+" ("+result.body+")");
+			console.error("!! Error:", result.statusCode, result.statusMessage);
+			endWithError(res, 500, "Error from remote server "+result.statusCode+" "+result.statusMessage);
 			return;
 		}
+		console.log("OK")
 		res.json(result.body)
 	})
 
-})
-
-app.get('fakeFootprints', [checkMsisdn, function(req, res, next){
-	let params = ['lat', 'lon', 'time', 'radius', 'pos_method']
-	for (i in params){
-		if (!req.query.includes(params[i])){
-			endWithError(res, 400, "Missing param \""+ params[i] +"\"")
-    		return;
-		}
-	}	
-	next()
-}], function(req, res){
-	let queryBody = {
-		sender :"GDV",
-		profile:"poisk",
-		version:"v0",
-		method:"teledata",
-		teledata: [{
-			subscriberId:"msisdn+"+req.query.msisdn.trim(),
-			source:"mobapp",
-			inputValues:[
-				{"inputs":[
-					{i:12432,v:{
-						latitude:req.query.lat,
-						longitude:req.query.lng,
-						radius:req.query.radius,
-						pos_method:req.query.pos_method,
-						metroName:null,
-						stationType:null}
-					},
-					{i:16384,v:req.query.time}]
-				}
-			]
-		}]
-		
-	}
-	request({
-		uri: conf.fakeFootprintsUrl,
-		method: 'POST',
-		json: queryBody,
-		headers: {
-			'Content-Type': 'application/json',
-			Authorization: 'Basic bGR0ZHB1c2VyMTp7QTMlcn1zb342dmI=',
-			'User-Agent': 'GDV_server_0.1',
-			Accept: '*/*',
-			Connection: 'keep-alive',
-		}
-	}, function (err, result, body) {
-	    if (err){
-			console.error("!! Error:", err);
-			endWithError(res, 500, "POST error ("+err+")");
-			return;
-		}
-		if (result.statusCode != 200){
-			console.error("!! Error:", result.statusCode, result.statusMessage, result.body);
-			endWithError(res, 500, "Error from remote server "+result.statusCode+" "+result.statusMessage+" ("+result.body+")");
-			return;
-		}
-		res.json(result.body)
-	})
-
-	return
 })
 
 app.get('/cells', function(req, res, next){
+	console.log("cells query with params",req.query)
 	if(!req.query.lata || !req.query.latb || !req.query.lona || !req.query.lonb){
 		endWithError(res, 400, "Missing coords")
     	return;
@@ -257,14 +204,16 @@ app.get('/cells', function(req, res, next){
 	connectors.cells.query("select f_get_sell_group from cell.f_get_sell_group("+req.query.lata+","+req.query.lona+","+req.query.latb+","+req.query.lonb+");", (err, data) => {
 	    if(err){
             console.error("DB error:", err)
-            endWithError(res, 500, "DB error ("+err+")");
+            endWithError(res, 500, "DB error");
             return;
         }
+        console.log("OK")
 	    res.json(data.rows[0].f_get_sell_group);
 	}) 
 })
 
 app.get('/poly', function(req, res, next){
+	console.log("poly query with params",req.query)
 	if(!req.query.lac || !req.query.cell){
 		endWithError(res, 400, "Missing params")
     	return;
@@ -279,9 +228,10 @@ app.get('/poly', function(req, res, next){
 	connectors.cells.query("select v_geo_js from cell.f_get_sell_info("+req.query.cell+" ,"+req.query.lac+");", (err, data) => {
 	    if(err){
             console.error("DB error:", err)
-            endWithError(res, 500, "DB error ("+err+")");
+            endWithError(res, 500, "DB error");
             return;
         }
+        console.log("OK")
 	    res.json(data.rows[0].v_geo_js);
 	}) 
 })
