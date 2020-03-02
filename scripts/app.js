@@ -13,7 +13,7 @@ let overlaysArr = [
 	["oneCellPoly", "oneCellPoly"],	
 	["cellAzimuts", "Ёжики"],
 	["cells", "Вышки"],
-	['userPoints', 'Точки ']
+	['userPoints', 'Статистика']
 ]
 
 var layers = {	
@@ -174,7 +174,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 function getData(type){
 	let doRequest = function(type, cb){
-		let uri = "/api/";
+		let uri = "./api/";
 		let params = {};
 		let genParamsString = function(params){
 			return Object.keys(params).map(el => {
@@ -577,7 +577,7 @@ function getData(type){
 			
 			return Object.keys(obj).map((i) => "<b>"+i+":</b> "+obj[i]).join("<br>");
 		}		
-		
+		console.log(data)
 		let markersArr = data.map(cellGroup => {
 			
 			let text = createText({cellNum: cellGroup.cell_data.length})
@@ -637,16 +637,13 @@ function getData(type){
 		let posMethods = [2, 4096, 8192]
 		let color = globalSettings.colors.points.raw.point.backgrounds[posMethods[+$("#userPointsMethod").val() -1]]
 		
-		if(!data.flat().length){
+		if(!data.length){
 			console.error("Empty data :(");
 			showError('Нет данных')
 		}
 
-		for(arr of data){
-			for(coords of arr){
-				L.circle(coords, {radius:1, color: color}).addTo(layers.userPoints)
-
-			}
+		for(coords of data){
+			L.circle(coords, {radius:1, color: color}).addTo(layers.userPoints)
 		}
 	}
 

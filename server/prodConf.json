@@ -1,0 +1,33 @@
+{
+	"postUrl": "http://inside.poisk.kubernetes/sodmtd-server/ldtdpsvc/rest/v0/ldtd",
+	"fakeFootprintsUrl": "http://10.72.12.8:9006/ldtdpsvc/rest/v0/mapp/receiver",
+	"mtsPoisk": {
+		"user": "equip_metric",
+		"host": "10.40.94.94",
+  		"database": "mts-poisk-production",
+  		"password": "C0mmonM3nr1csPOSW0RD",
+  		"port": 5432
+	},
+	"cells": {
+		"user": "sodmtd_metric",
+		"host": "10.72.12.17",
+		"database": "sodmtd_s",
+		"password": "C0mmonM3nr1csPOSW0RD",
+		"port": 5432
+	},
+	"area0": {
+		"user": "sodmtd_metric",
+		"host": "10.72.12.21",
+		"database": "sodmtd",
+		"password": "C0mmonM3nr1csPOSW0RD",
+		"port": 5432
+	},
+	"area1": {
+		"user": "sodmtd_metric",
+		"host": "10.72.12.25",
+		"database": "sodmtd",
+		"password": "C0mmonM3nr1csPOSW0RD",
+		"port": 5432
+	}
+
+}

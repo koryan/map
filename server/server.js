@@ -1,0 +1,297 @@
+const http = require('http')
+const querystring = require('querystring')
+const express = require('express');
+const app = module.exports = express();
+const { Pool } = require('pg');
+const async = require('async');
+const request = require('request');
+const env = ["preProd","prod"][0];
+const conf = require('./'+env+'Conf.json');
+
+app.set('port', 3001);
+
+let initPool = function(data){
+	let poolConnetorParams = {
+		max:20,
+		idleTimeoutMillis: 30000,
+		connectionTimeoutMillis: 10000,
+	}
+	return new Pool(Object.assign(data, poolConnetorParams))
+}
+
+let connectors = {
+	mtsPoisk:  initPool(conf.mtsPoisk),
+	cells: initPool(conf.cells),
+	area: [
+		initPool(conf.area0),
+		initPool(conf.area1),
+	]
+}
+
+let endWithError = function(res, status, errorText){
+  if(errorText)res.set("X-Error", errorText)
+  res.sendStatus(status)
+}
+
+let checkMsisdn =  function (req, res, next) {
+	if (!req.query.msisdn){
+		endWithError(res, 400, "Empty msisdn")
+    	return;
+	}
+    let test = new RegExp(/^\+?(7\(*\d{3}\)*\d{7})$/);
+    if (!test.test(req.query.msisdn.trim())){
+    	endWithError(res, 400, "Wrong msisdn")
+    	return;
+    }else next()
+};
+
+
+app.get('/favicon.ico', (req, res) => res.status(204));
+
+app.get('/geo', checkMsisdn, function(req, res){ 
+	
+    let msisdn = req.query.msisdn;
+
+    connectors.mtsPoisk.query("select get_user_zone from poi.get_user_zone("+msisdn+");", (err, data) => {
+	    if(err){
+            console.error("!!!!!!!!!", err)
+            endWithError(res, 500, "DB error ("+err+")");
+            return;
+        }
+	    res.json(data.rows[0].get_user_zone);
+	})    
+}); 
+
+
+app.get('/area', function(req, res, next){
+	if(!req.query.lata || !req.query.latb || !req.query.lona || !req.query.lonb){
+		endWithError(res, 400, "Missing coords");
+    	return;
+	}
+
+	if(!req.query.startTime || !req.query.endTime){
+		endWithError(res, 400, "Missing time period");
+    	return;
+	}
+
+	if(!req.query.method){
+		endWithError(res, 400, "Missing method");
+    	return;
+	}
+
+	next()
+}, function(req, res){
+	
+	let query = "select f_get_all_points from main.f_get_all_points("+req.query.lata+","+req.query.lona+","+req.query.latb+","+req.query.lonb+",'"+req.query.startTime+"','"+req.query.endTime+"',"+req.query.method+");"
+
+	async.parallel([
+		function(cb){
+			connectors.area[0].query(query, cb)
+		},
+		function(cb){
+			connectors.area[1].query(query, cb)
+		}		
+	], function(err, results){
+		if(err){
+			console.error("!! Error:", err);
+			endWithError(res, 500, "DB error ("+err+")");
+		}
+		res.json(results[0].rows[0].f_get_all_points.concat(results[1].rows[0].f_get_all_points));
+	})
+})
+
+app.get('/coords', [checkMsisdn,function(req, res, next){
+	if (!req.query.type){
+		endWithError(res, 400, "Missing type");
+    	return;
+	}
+	if (!["raw", "processed", "last", "live"].includes(req.query.type)){
+		endWithError(res, 400, "Wrong type");
+    	return;
+	}
+
+	if (req.query.type != "live" && (!req.query.startTime || !req.query.endTime)){
+		endWithError(res, 400, "Missing time period");
+    	return;
+	}
+	next()
+
+}], function(req, res){
+
+	let type = req.query.type;
+	let queryBody = {
+		sender: "gdv_sender",
+		profile :"poisk",
+		subscriberId :"msisdn+"+req.query.msisdn.trim(),
+		priority: 3,
+		hideTimes: [],
+		sources: ["locations"],
+		inputs: [12561, 16384],
+		infolevel: 1,
+		lang: "ru"
+	}
+	let url = conf.postUrl;
+	switch(type){
+		case "live":
+			url += "/opervals?action=getOnce"
+			queryBody.age = 180;
+			break;
+		case "processed":
+			url += "/histvals";
+			queryBody.inputs = [13001,16384];
+			break;
+		case "raw":
+			url += "/histvals";
+			break;
+		case "last":
+			url +="/opervals?action=getLast"
+			queryBody.limit = 2;
+			break;
+	}
+	if (type != "live"){
+		queryBody.startTime = req.query.startTime;
+		queryBody.endTime = req.query.endTime;
+	}
+
+	request({
+		uri: url,
+		method: 'POST',
+		json: queryBody,
+		headers: {
+			'Content-Type': 'application/json',
+			Authorization: 'Basic bGR0ZHB1c2VyMTp7QTMlcn1zb342dmI=',
+			'User-Agent': 'GDV_server_0.1',
+			Accept: '*/*',
+			Connection: 'keep-alive',
+		}
+	}, function (err, result, body) {
+	    if (err){
+			console.error("!! Error:", err);
+			endWithError(res, 500, "POST error ("+err+")");
+			return;
+		}
+		if (result.statusCode != 200){
+			console.error("!! Error:", result.statusCode, result.statusMessage, result.body);
+			endWithError(res, 500, "Error from remote server "+result.statusCode+" "+result.statusMessage+" ("+result.body+")");
+			return;
+		}
+		res.json(result.body)
+	})
+
+})
+
+app.get('fakeFootprints', [checkMsisdn, function(req, res, next){
+	let params = ['lat', 'lon', 'time', 'radius', 'pos_method']
+	for (i in params){
+		if (!req.query.includes(params[i])){
+			endWithError(res, 400, "Missing param \""+ params[i] +"\"")
+    		return;
+		}
+	}	
+	next()
+}], function(req, res){
+	let queryBody = {
+		sender :"GDV",
+		profile:"poisk",
+		version:"v0",
+		method:"teledata",
+		teledata: [{
+			subscriberId:"msisdn+"+req.query.msisdn.trim(),
+			source:"mobapp",
+			inputValues:[
+				{"inputs":[
+					{i:12432,v:{
+						latitude:req.query.lat,
+						longitude:req.query.lng,
+						radius:req.query.radius,
+						pos_method:req.query.pos_method,
+						metroName:null,
+						stationType:null}
+					},
+					{i:16384,v:req.query.time}]
+				}
+			]
+		}]
+		
+	}
+	request({
+		uri: conf.fakeFootprintsUrl,
+		method: 'POST',
+		json: queryBody,
+		headers: {
+			'Content-Type': 'application/json',
+			Authorization: 'Basic bGR0ZHB1c2VyMTp7QTMlcn1zb342dmI=',
+			'User-Agent': 'GDV_server_0.1',
+			Accept: '*/*',
+			Connection: 'keep-alive',
+		}
+	}, function (err, result, body) {
+	    if (err){
+			console.error("!! Error:", err);
+			endWithError(res, 500, "POST error ("+err+")");
+			return;
+		}
+		if (result.statusCode != 200){
+			console.error("!! Error:", result.statusCode, result.statusMessage, result.body);
+			endWithError(res, 500, "Error from remote server "+result.statusCode+" "+result.statusMessage+" ("+result.body+")");
+			return;
+		}
+		res.json(result.body)
+	})
+
+	return
+})
+
+app.get('/cells', function(req, res, next){
+	if(!req.query.lata || !req.query.latb || !req.query.lona || !req.query.lonb){
+		endWithError(res, 400, "Missing coords")
+    	return;
+	}
+	next();
+}, function(req, res){	
+	if(env == 'prod'){
+		endWithError(res, 501, "No data in prod DB")
+		return
+	}
+
+	connectors.cells.query("select f_get_sell_group from cell.f_get_sell_group("+req.query.lata+","+req.query.lona+","+req.query.latb+","+req.query.lonb+");", (err, data) => {
+	    if(err){
+            console.error("DB error:", err)
+            endWithError(res, 500, "DB error ("+err+")");
+            return;
+        }
+	    res.json(data.rows[0].f_get_sell_group);
+	}) 
+})
+
+app.get('/poly', function(req, res, next){
+	if(!req.query.lac || !req.query.cell){
+		endWithError(res, 400, "Missing params")
+    	return;
+	}
+	next();
+}, function(req, res){	
+	if(env == 'prod'){
+		endWithError(res, 501, "No data on prod DB")
+		return
+	}
+
+	connectors.cells.query("select v_geo_js from cell.f_get_sell_info("+req.query.cell+" ,"+req.query.lac+");", (err, data) => {
+	    if(err){
+            console.error("DB error:", err)
+            endWithError(res, 500, "DB error ("+err+")");
+            return;
+        }
+	    res.json(data.rows[0].v_geo_js);
+	}) 
+})
+
+
+
+app.get('*', function(req, res){
+	endWithError(res, 404);
+});
+
+http.createServer(app).listen(app.get('port'), function () {
+  console.log('Server listening on port ' + app.get('port'));
+});

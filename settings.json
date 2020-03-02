@@ -51,7 +51,7 @@
 					"motion0":"rgba(255, 0,0, .4)",
 					"motion1":"rgba(255, 255, 0, .4)",
 					"motion2":"rgba(100, 100  , 0, .4)",
-					"motion3":"rgba(0,0, 255, .4)",
+					"motion3":"rgba(0,100, 100, .4)",
 					"motion4":"rgba(0,255,255, .4)"
 				},
 				"opacity": 0.5
