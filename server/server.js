@@ -5,8 +5,8 @@ const app = module.exports = express();
 const { Pool } = require('pg');
 const async = require('async');
 const request = require('request');
-const env = ["prod","preProd"][1];
-const conf = require('./'+env+'Conf.json');
+const conf = require('./config.json');
+const confDB = require('./'+ conf.env +'Conf.json')
 
 app.set('port', conf.appPort);
 
@@ -19,12 +19,13 @@ let initPool = function(data){
 	return new Pool(Object.assign(data, poolConnetorParams))
 }
 
+
 let connectors = {
-	mtsPoisk:  initPool(conf.mtsPoisk),
-	cells: initPool(conf.cells),
+	mtsPoisk:  initPool(confDB.mtsPoisk),
+	cells: initPool(confDB.cells),
 	area: [
-		initPool(conf.area0),
-		initPool(conf.area1),
+		initPool(confDB.area0),
+		initPool(confDB.area1),
 	]
 }
 
@@ -66,6 +67,12 @@ app.get('/geo', checkMsisdn, function(req, res){
 
 app.get('/area', function(req, res, next){
 	console.log("area query with params",req.query)
+
+	if(conf.env == 'preProd'){
+		endWithError(res, 501, "No data in prod DB")
+		return
+	}
+
 	if(!req.query.lata || !req.query.latb || !req.query.lona || !req.query.lonb){
 		endWithError(res, 400, "Missing coords");
     	return;
@@ -135,7 +142,7 @@ app.get('/coords', [checkMsisdn,function(req, res, next){
 		infolevel: 1,
 		lang: "ru"
 	}
-	let url = conf.postUrl;
+	let url = confDB.postUrl;
 	switch(type){
 		case "live":
 			url += "/opervals?action=getOnce"
@@ -173,7 +180,7 @@ app.get('/coords', [checkMsisdn,function(req, res, next){
 		}
 	}, function (err, result, body) {
 	    if (err){
-			console.error("!! Error:", err);
+			console.error("! Error:", err);
 			endWithError(res, 500, "POST error");
 			return;
 		}
@@ -182,8 +189,12 @@ app.get('/coords', [checkMsisdn,function(req, res, next){
 			endWithError(res, 500, "Error from remote server "+result.statusCode+" "+result.statusMessage);
 			return;
 		}
+		
+		if (type == "live"){
+			result.body.inputValues = [{inputs: result.body.inputs}]
+		}
 		console.log("OK")
-		res.json(result.body)
+		res.json(result.body.inputValues.reverse())
 	})
 
 })
@@ -196,7 +207,7 @@ app.get('/cells', function(req, res, next){
 	}
 	next();
 }, function(req, res){	
-	if(env == 'prod'){
+	if(conf.env == 'prod'){
 		endWithError(res, 501, "No data in prod DB")
 		return
 	}
@@ -220,7 +231,7 @@ app.get('/poly', function(req, res, next){
 	}
 	next();
 }, function(req, res){	
-	if(env == 'prod'){
+	if(conf.env == 'prod'){
 		endWithError(res, 501, "No data on prod DB")
 		return
 	}
@@ -236,7 +247,14 @@ app.get('/poly', function(req, res, next){
 	}) 
 })
 
-
+app.get("/params", (req, res) => {
+	const serverParams = {
+		appName: (conf.appName)?conf.appName:undefined,
+		appVersion: (conf.appVersion)?conf.appVersion:undefined,
+		config: conf.env
+	}
+	res.json(serverParams);
+})
 
 app.get('*', function(req, res){
 	endWithError(res, 404);

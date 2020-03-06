@@ -85,6 +85,21 @@ $.get("./settings.json").done(function(data){
 	showFail(err, text)	
 })
 
+//get server info
+$.get("./api/params").done(function(data){
+	$("title").html(data.appName+" "+data.appVersion+ "  ("+data.config+")")
+	if (data.config == "preProd"){
+		$("button#userPoints~select").hide()
+		$("button#userPoints").hide()
+		
+	}
+	if (data.config == "prod"){
+		$("button#cellTowers").hide()
+		$("button#oneCellTower").hide()		
+	}
+}).fail(function(err){
+	console.error("No data from server", err)
+})
 
 //init date & time
 $( function() {
@@ -282,26 +297,11 @@ function getData(type){
 	}
 
 	let drawPoints = function(type, data){
-		
-		//rename values for live data
-		if(type == "live"){
-			data.inputValues = data.inputs;
-			delete data.inputs;
 
-			if(!data.inputValues[0]){
-				$("#live>noData").css("display","inline-block");
-				return;
-			}
-	
-			data.inputValues = [{inputs: data.inputValues}]
-		}
-
-		if(!data.inputValues){
+		if(!data || !data.length){
 			$("#"+ type +">noData").css("display","inline-block");
 			return
 		}
-
-		
 
 		let usedCoords = {};
 		let lineCoords = [];
@@ -313,8 +313,8 @@ function getData(type){
 			return Object.keys(obj).map((i) => "<b>"+i+":</b> "+obj[i]).join("<br>");
 		}
 
-		for (let i in data.inputValues){
-			let currentMarker =  data.inputValues[i];
+		for (let i in data){
+			let currentMarker =  data[i];
 
 			let coords = [currentMarker.inputs[0].v.latitude, currentMarker.inputs[0].v.longitude];
 			let radius = currentMarker.inputs[0].v.radius

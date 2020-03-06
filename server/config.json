@@ -1,0 +1,6 @@
+{	
+	"appName": "geoDataVisualiser",
+	"appVersion": "9.0.1",
+	"appPort": 3001,
+	"env":"preProd"
+}

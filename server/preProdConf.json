@@ -1,7 +1,5 @@
 {
-	"appPort": 50001,
 	"postUrl": "http://10.40.94.4:9005/ldtdpsvc/rest/v0/ldtd",
-	"fakeFootprintsUrl": "http://10.72.12.8:9006/ldtdpsvc/rest/v0/mapp/receiver",
 	"mtsPoisk": {
 		"user": "equip_metric",
 		"host": "10.40.94.94",
